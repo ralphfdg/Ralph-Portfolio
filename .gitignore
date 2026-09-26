@@ -73,11 +73,10 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+# Ignore every .env variant so a real secret cannot be committed by accident,
+# then re-admit the checked-in template.
+.env*
+!.env.example
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -128,9 +127,20 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+# pnp
+.pnp
+.pnp.js
+
 # yarn v2
 .yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Next.js
+next-env.d.ts
+.vercel
+
+# testing
+/coverage
