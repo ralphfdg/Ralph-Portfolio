@@ -793,7 +793,7 @@ const fragmentShader = `
 precision highp float;
 
 uniform float uTime;
-uniform vec2 uResolution;
+uniform vec3 uResolution;
 uniform float uSpeed;
 uniform float uScale;
 uniform float uBrightness;
@@ -1010,7 +1010,7 @@ export default function SoftAurora({
     resizeObserver.observe(container);
     resize();
 
-    let currentMouse = [0.5, 0.5];
+    const currentMouse = [0.5, 0.5];
     let targetMouse = [0.5, 0.5];
     let visible = true;
     let frame = 0;
@@ -1103,7 +1103,9 @@ export default function SoftAurora({
 }
 ```
 
-Four changes against the upstream source, recorded here so a later reader can tell them from upstream: `uResolution` is a `vec2` rather than a `vec3` (the third component was never read in the shader), `uLightMode` and its branch are gone, `enableMouseInteraction` defaults to `false`, and the container is `pointer-events-none`.
+Seven changes against the upstream source, recorded here so a later reader can tell them from upstream: `uLightMode` and its branch are gone, `enableMouseInteraction` defaults to `false`, the container is `pointer-events-none`, `dpr` is capped at 1.5, a `ResizeObserver` replaces the window resize listener, an `IntersectionObserver` pauses the loop offscreen, and reduced motion renders one frame with no `requestAnimationFrame` at all.
+
+One deviation from this plan as first written: an earlier draft declared `uniform vec2 uResolution` while the TypeScript still passed three-element arrays. WebGL rejects `uniform2fv` with an odd-length array, so the uniform would have stayed at zero and `gl_FragCoord.xy / uResolution.y` would have divided by zero, blanking the band. `uResolution` stays a `vec3`, matching the values the component passes and the upstream shader.
 
 - [ ] **Step 3: Confirm the shader compiles**
 
@@ -1335,9 +1337,27 @@ Run: `npm run dev`, load `http://localhost:3000`.
 - The hero's bottom edge has no hairline border and no visible canvas rectangle; the aurora fades upward into the page.
 - `Emulate` `prefers-reduced-motion: reduce`, reload: blobs are static, the aurora renders one frame and is not animating, hero copy is fully visible.
 - Count live canvases: expect 2 (the lattice and the aurora). Scroll past the hero and confirm the aurora's rAF stops.
-- Force the WebGL-unavailable path by evaluating
-  `HTMLCanvasElement.prototype.getContext = () => null` in the console before
-  load, then reload: the hero must render on the CSS gradient alone with no error.
+- Exercise the WebGL-unavailable path. Overriding `getContext` in the console does
+  not work, because the override is lost on reload. Use Playwright's init script,
+  which runs before any page script:
+
+  ```js
+  async (page) => {
+    await page.addInitScript(() => {
+      const original = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (type, ...rest) {
+        if (String(type).includes("webgl")) return null;
+        return original.call(this, type, ...rest);
+      };
+    });
+    await page.goto("http://localhost:3000");
+    await page.waitForTimeout(1200);
+    return { canvases: await page.locator("canvas").count() };
+  }
+  ```
+
+  Expected: the hero renders on the CSS gradient alone, the aurora band is absent
+  rather than blank, and the console shows no uncaught error.
 - Check the console is clean.
 
 - [ ] **Step 5: Commit**
