@@ -24,7 +24,7 @@ export function Skills() {
       index="02"
       eyebrow="Technical skills"
       title="My skills"
-      lede="The tools I actually reach for, rather than an exhaustive list of everything I have opened once. The helix is this same list, turned."
+      lede="The tools and programming languages I know."
     >
       {/* Equal columns: the list is the readable, selectable, no-JavaScript
           half and the spiral is the decorative one, so neither is asked to do

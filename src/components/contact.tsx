@@ -14,7 +14,7 @@ export function Contact() {
       index="03"
       eyebrow="Contact me"
       title="Let's make magic together!"
-      lede="Tell me what you are building and I will tell you honestly whether I can help. Email is the fastest way to reach me."
+      lede="Tell me what you are building and I will work my magic! Email is the fastest way to reach me."
     >
       <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3" data-reveal>
         <a
