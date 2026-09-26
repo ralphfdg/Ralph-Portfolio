@@ -4,6 +4,7 @@ export function Section({
   eyebrow,
   title,
   lede,
+  tone = "default",
   children,
 }: {
   id: string;
@@ -13,8 +14,17 @@ export function Section({
   title: string;
   /** Optional supporting line, rendered under the title. */
   lede?: string;
+  /**
+   * `brand` fills the section with `--color-accent-deep` and moves the muted
+   * text up to `--color-accent-bright`. It has to: muted is 4.43:1 on that
+   * fill, just under the 4.5 AA threshold for body text, and `--color-line` is
+   * 1:1 there, so the default hairline would vanish entirely.
+   */
+  tone?: "default" | "brand";
   children: React.ReactNode;
 }) {
+  const onBrand = tone === "brand";
+
   return (
     /* `relative` is load-bearing, not decoration: the Work/Skills ambience is an
        absolutely positioned sibling. Without a positioning context here, that
@@ -23,12 +33,24 @@ export function Section({
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="relative scroll-mt-24 py-20 md:py-28"
+      className={`relative scroll-mt-24 py-20 md:py-28 ${
+        onBrand ? "bg-accent-deep" : ""
+      }`}
     >
       <div className="mx-auto w-full max-w-5xl px-6">
-        <div className="flex items-baseline gap-4 border-b border-line pb-4">
+        <div
+          className={`flex items-baseline gap-4 border-b pb-4 ${
+            onBrand ? "border-accent/50" : "border-line"
+          }`}
+        >
           <span className="font-mono text-xs text-accent-bright">{index}</span>
-          <p className="type-eyebrow text-muted">{eyebrow}</p>
+          <p
+            className={`type-eyebrow ${
+              onBrand ? "text-accent-bright" : "text-muted"
+            }`}
+          >
+            {eyebrow}
+          </p>
         </div>
 
         <h2
@@ -39,7 +61,13 @@ export function Section({
         </h2>
 
         {lede ? (
-          <p className="mt-4 max-w-2xl leading-relaxed text-muted">{lede}</p>
+          <p
+            className={`mt-4 max-w-2xl leading-relaxed ${
+              onBrand ? "text-accent-bright" : "text-muted"
+            }`}
+          >
+            {lede}
+          </p>
         ) : null}
 
         {children}
