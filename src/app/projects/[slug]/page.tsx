@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Contact } from "@/components/contact";
 import { getProject, projects } from "@/lib/content/projects";
+import { site } from "@/lib/content/site";
 import type { Project } from "@/lib/content/schema";
 
 export function generateStaticParams() {
@@ -21,7 +22,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${project.title} · Ralph Ethan De Guzman`,
+    title: `${project.title} · ${site.name}`,
     description: project.hook,
   };
 }

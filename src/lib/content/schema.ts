@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const projectStatusSchema = z.enum(["live", "private", "wip"]);
+/**
+ *   live    -> deployed and publicly reachable, so a live URL is required
+ *   repo    -> finished and readable as source, but never deployed
+ *   private -> the code is not public either
+ *   wip     -> still being built
+ */
+export const projectStatusSchema = z.enum(["live", "repo", "private", "wip"]);
 
 export const projectLinkSchema = z.object({
   label: z.string().min(1),
@@ -83,6 +89,7 @@ export const siteSchema = z.object({
   name: z.string().min(1),
   title: z.string().min(1),
   hook: z.string().min(1),
+  email: z.email(),
   avatar: z.object({
     src: z.string().min(1),
     alt: z.string().min(1),

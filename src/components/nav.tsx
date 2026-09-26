@@ -29,8 +29,11 @@ export function Nav() {
                 </a>
               </li>
             ))}
+            {/* Socials sit in the footer and the contact section too, so they
+                drop out of the bar on narrow screens instead of wrapping a
+                sticky header onto a second line. */}
             {site.socials.map((social) => (
-              <li key={social.href}>
+              <li key={social.href} className="hidden sm:block">
                 <a
                   href={social.href}
                   className="font-mono text-xs uppercase tracking-[0.12em] text-muted transition-colors hover:text-accent"

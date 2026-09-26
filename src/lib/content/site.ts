@@ -1,23 +1,29 @@
 import type { SiteConfig } from "./schema";
 
 export const site: SiteConfig = {
-  name: "Ralph Ethan De Guzman",
+  name: "Ethan",
   title: "Software Engineer",
-  hook: "Software engineer building full-stack web and cloud systems.",
+  hook: "Full-stack engineer building Laravel, TypeScript, and AWS systems, from AI-assisted clinical tooling to property management.",
+
+  email: "ralphethan18@gmail.com",
 
   avatar: {
     src: "/avatar.jpg",
-    alt: "Portrait of Ralph Ethan De Guzman",
+    alt: "Portrait of Ethan",
   },
 
   resume: {
     href: "/resume.pdf",
-    filename: "Ralph-Ethan-De-Guzman-Resume.pdf",
+    filename: "Ethan-De-Guzman-Resume.pdf",
   },
 
-  // Add entries as the URLs are confirmed. The nav and footer skip
-  // rendering a link when its target is empty.
-  socials: [],
+  socials: [
+    { label: "GitHub", href: "https://github.com/ralphfdg" },
+    {
+      label: "LinkedIn",
+      href: "https://linkedin.com/in/ralph-de-guzman-161725314",
+    },
+  ],
 
   skills: [
     {
@@ -55,7 +61,7 @@ export const site: SiteConfig = {
     {
       id: "cloud",
       label: "Cloud & Platforms",
-      items: ["Azure Services", "Firebase"],
+      items: ["AWS", "Azure Services"],
     },
     {
       id: "tools",

@@ -2,38 +2,36 @@ import { Section } from "./section";
 import { site } from "@/lib/content/site";
 
 /**
- * The contact form is deferred to a later pass, so this renders an honest
- * placeholder rather than a dead form. It exists so the nav's `#contact`
- * anchor and the Work section's fallback link both resolve to something real.
+ * The contact form is deferred to a later pass, so this renders a working
+ * `mailto:` rather than a form that cannot submit anything. It exists so the
+ * nav's `#contact` anchor and the Work section's fallback link both resolve
+ * to something real.
  */
 export function Contact() {
-  const hasSocials = site.socials.length > 0;
-
   return (
     <Section id="contact" eyebrow="Contact" title="Get in touch">
       <p className="mt-6 max-w-xl leading-relaxed text-muted">
-        The contact form is the next piece of work, so this is the right place to
-        leave a placeholder. Everything else on this site is wired up and
-        verifiable.
+        The contact form is the next piece of work. Until it lands, email is the
+        fastest way to reach me.
       </p>
 
-      {hasSocials ? (
-        <div className="mt-8 flex flex-wrap items-center gap-5">
-          {site.socials.map((social) => (
-            <a
-              key={social.href}
-              href={social.href}
-              className="font-mono text-xs uppercase tracking-[0.12em] text-accent underline-offset-4 hover:underline"
-            >
-              {social.label}
-            </a>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-8 font-mono text-xs text-muted">
-          Email and social links are still to be confirmed.
-        </p>
-      )}
+      <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <a
+          href={`mailto:${site.email}`}
+          className="font-mono text-sm text-accent underline-offset-4 hover:underline"
+        >
+          {site.email}
+        </a>
+        {site.socials.map((social) => (
+          <a
+            key={social.href}
+            href={social.href}
+            className="font-mono text-xs uppercase tracking-[0.12em] text-muted underline-offset-4 hover:text-accent hover:underline"
+          >
+            {social.label}
+          </a>
+        ))}
+      </div>
     </Section>
   );
 }

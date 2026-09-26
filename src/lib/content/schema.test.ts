@@ -50,6 +50,28 @@ describe("content schema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts a repo project with no links", () => {
+    const result = projectSchema.safeParse({
+      ...validProject,
+      status: "repo",
+      links: [],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects an unknown status", () => {
+    const result = projectSchema.safeParse({
+      ...validProject,
+      status: "archived",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a malformed site email", () => {
+    const result = siteSchema.safeParse({ ...site, email: "not-an-email" });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects a duplicate slug", () => {
     const result = projectsSchema.safeParse([
       validProject,

@@ -12,6 +12,10 @@ const statusMeta: Record<ProjectStatus, { label: string; className: string }> = 
     label: "Live",
     className: "border-accent text-accent",
   },
+  repo: {
+    label: "Source only",
+    className: "border-accent text-accent",
+  },
   private: {
     label: "Private repo",
     className: "border-line text-muted",
@@ -22,7 +26,14 @@ const statusMeta: Record<ProjectStatus, { label: string; className: string }> = 
   },
 };
 
-export function ProjectCard({ project }: { project: Project }) {
+export function ProjectCard({
+  project,
+  priority = false,
+}: {
+  project: Project;
+  /** Set on the first card, whose screenshot is the page's LCP element. */
+  priority?: boolean;
+}) {
   const status = statusMeta[project.status];
 
   return (
@@ -32,6 +43,7 @@ export function ProjectCard({ project }: { project: Project }) {
           src={project.screenshot.src}
           alt={project.screenshot.alt}
           fill
+          priority={priority}
           sizes="(min-width: 768px) 40vw, 100vw"
           className="object-cover"
         />

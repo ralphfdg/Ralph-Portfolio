@@ -22,8 +22,12 @@ export function Projects() {
         </div>
       ) : (
         <div className="mt-12 grid gap-6 md:grid-cols-2">
-          {featured.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
+          {featured.map((project, index) => (
+            <ProjectCard
+              key={project.slug}
+              project={project}
+              priority={index === 0}
+            />
           ))}
         </div>
       )}

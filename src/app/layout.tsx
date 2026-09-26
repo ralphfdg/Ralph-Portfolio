@@ -30,9 +30,9 @@ const satoshi = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Ralph Ethan De Guzman",
+  title: "Ethan — Software Engineer",
   description:
-    "Software engineer building full-stack web and cloud systems.",
+    "Full-stack engineer building Laravel, TypeScript, and AWS systems, from AI-assisted clinical tooling to property management.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
