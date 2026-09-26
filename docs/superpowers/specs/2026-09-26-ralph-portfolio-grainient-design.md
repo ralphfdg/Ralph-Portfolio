@@ -43,13 +43,36 @@ importer).
 
 ### Colours
 
-The three brand tokens map onto the shader's three stops directly:
+**The palette shipped is violet and deliberately sits outside the brand ramp.**
+The original three-stop mapping below was the starting point and is kept here
+because the reasoning that displaced it is the useful part:
 
-| Prop     | Value     | Token                             |
-| -------- | --------- | --------------------------------- |
-| `color1` | `#9db4e3` | `--color-accent-bright`           |
-| `color2` | `#4d6fd1` | `--color-accent`                  |
-| `color3` | `#1c2547` | `--color-accent-deep`             |
+| Prop     | Starting value | Token                             |
+| -------- | -------------- | --------------------------------- |
+| `color1` | `#9db4e3`      | `--color-accent-bright`           |
+| `color2` | `#4d6fd1`      | `--color-accent`                  |
+| `color3` | `#1c2547`      | `--color-accent-deep`             |
+
+That ramp is slate blue, and slate blue at these luminances is very nearly
+grey. The first live pass measured a median chroma of 42/255 and a median
+luminance of 0.0056 — the field read as black with a blue cast, not as colour.
+Re-running the ramp search for a violet put the shipped values on the same
+`color1 > color2 > color3` ordering:
+
+| Prop     | Shipped value | Note                                    |
+| -------- | ------------- | --------------------------------------- |
+| `color1` | `#5a34c0`     | mid violet, does the actual colouring   |
+| `color2` | `#2a1c7d`     | deep indigo                             |
+| `color3` | `#0b0826`     | near-black violet, the shadow end        |
+
+`gamma` is `1.05`, i.e. very nearly untouched. That is a considered choice: the
+upstream default is `0.3`, and any gamma below 1 crushes the midtones toward
+black, which is the exact failure being fixed. Leaving the ramp alone and
+letting the hues carry the colour is what moved median luminance 7x.
+
+A bluer ramp was also measured and scored higher on raw chroma (164 against
+138), but its red channel sat at 6/255, which reads as neon against near-black.
+The violet keeps some warmth. This is a judgement call, not a measurement.
 
 `lightMode` is always false; the site is dark throughout.
 
@@ -138,6 +161,10 @@ This change overturns that. The split *composition* — portrait beside actions
   changes from `bg-accent-deep` to `bg-surface-2`, because a solid
   `accent-deep` rectangle behind a now-transparent section reads as a hole
   during image load.
+- `min-h-[280px] md:min-h-[420px]` becomes `aspect-[6/7]`. The source portrait
+  is 1716×1748, so a fixed ratio crops the same slice the old 360×420 box did,
+  but it stays true when the column is narrower than 360px — under `min-h` the
+  image grew to fill whatever height the row happened to take.
 - The actions column gains `items-center text-center`. It already had
   `justify-center`, which on a `flex-col` centres the *vertical* axis and does
   nothing horizontally — the reason the content looked left-aligned.
@@ -151,30 +178,62 @@ hero used to have: three gradient blobs, the dot grid, and the aurora band at
 the section's bottom, masked at the top edge so it rises out of the page
 rather than showing the canvas rectangle.
 
-- The blobs reuse the existing `@keyframes glow-drift-a/b/c` and
+- The blobs reuse the (renamed) `@keyframes blob-drift-a/b/c` and
   `rgb(157 180 227 / …)`, `rgb(77 111 209 / …)`, `rgb(107 138 222 / …)`.
   Same palette, same drift, so the two decorated sections read as one system.
 - `.hero-aurora` is renamed `.aurora-band` rather than duplicated, since it now
   has one consumer.
 - The `DotGrid` keeps the hero's exact props: `dotSize 5`, `gap 18`,
   `baseColor #2A3350`, `activeColor #9DB4E3`, `proximity 140`.
+- The blobs paint **before** the dot grid, not after. They are soft translucent
+  gradients, so anything beneath them loses contrast, and these dots brighten on
+  pointer proximity; the grid has to stay on top for the interaction to read.
 
 ## `Section`
 
-`tone="brand"` currently paints `bg-accent-deep` on the section. That fill has
-to go, or it hides the very blobs it exists to colour. What survives is the
-text treatment — `text-accent-bright` for the eyebrow and lede,
-`border-accent/50` for the hairline — which is now *safer* than before.
+Both `tone` and `layout` are **removed outright**, not narrowed. `Contact` was
+their only consumer, so keeping them as single-variant unions would have left two
+props whose only legal value was the default — noise with no second caller to
+justify it. The section API gains one prop in exchange:
 
-The doc comment's reasoning inverts and is rewritten accordingly. It argued
-that `brand` had to paint a fill because `--color-muted` is 4.43:1 on
-`accent-deep`, just under AA. On a dark blob field `accent-bright` clears AA
-with room to spare, so the text treatment is now doing the accessibility work
-on its own and the fill is redundant.
+| Prop       | Shape            | Why                                                        |
+| ---------- | ---------------- | ---------------------------------------------------------- |
+| `backdrop` | `React.ReactNode` | decorative layers, rendered outside the reading column so they can run to the section's edges |
+| `onField`  | `boolean`        | the backdrop is a *moving* field, so the supporting text needs the brighter muted token |
 
-`layout` loses the `split` variant. `contained` becomes the only value, which
-means the prop itself is redundant — it is left in place as a single-variant
-union rather than removed, so the section API does not change shape.
+The backdrop wrapper is `aria-hidden`, `pointer-events-none` and clips its own
+overflow. Clipping there rather than on the `<section>` is deliberate: making
+the section `overflow-hidden` would turn it into a scroll container and break
+`position: sticky` for anything nested inside it. The content wrapper keeps
+`relative` so the copy wins the paint order against an absolutely positioned
+backdrop.
+
+### `onField`, and why the eyebrow and lede had to move
+
+`tone="brand"` existed to paint `bg-accent-deep`, and its doc comment explained
+that the fill was load-bearing: `--color-muted` is 4.43:1 on `accent-deep`,
+just under AA. Removing the fill without moving the text **looked** safe and was
+not — it was a real regression, caught by measurement rather than by reading the
+code.
+
+With the fill gone, Contact's copy sits on the dot lattice plus drifting blobs.
+Those push the local background to roughly `rgb(50,58,77)`, and `--color-muted`
+fell to **3.26:1** on the eyebrow and **3.37:1** on the lede. Both fail AA.
+
+The fix is the same one the hero hook already uses, for the same reason: text on
+a moving field uses `--color-muted-bright` (`#c2c4cd`). `onField` is that
+decision expressed once, in the component that owns the header, instead of a
+colour passed in per section.
+
+| Run                   | Eyebrow | Lede  |
+| --------------------- | ------- | ----- |
+| `text-muted`, measured | 3.26:1  | 3.37:1 |
+| `text-muted-bright`    | 5.85:1  | 5.95:1 |
+
+`border-accent/50` becomes `border-line` for the hairline, which is a real
+regression against a blob field and had to go. `index` and `title` are
+untouched: the numeral is already `text-accent-bright` and the title is
+`text-fg`, and both clear AA on this background unaided.
 
 ## Work and Skills
 
@@ -214,9 +273,11 @@ hero is on screen, and `DotGrid` and `SoftAurora` only while Contact is.
   `data-parallax-scope` fallback and both `data-parallax-scope` attributes
   have no remaining consumer. The `[data-reveal]` loop is untouched; it has
   four live users.
-- `.hero-gradient`, `.hero-glows`, `.hero-glow--a|b|c`, `.work-glows`,
-  `.work-glow--a|b|c`. `@keyframes glow-drift-a/b/c` are **kept** — the
-  contact blobs use them.
+- `.hero-gradient`, `.hero-glows`, `.hero-glow--a|b|c`, `.hero-aurora`,
+  `.work-glows`, `.work-glow--a|b|c`. `@keyframes glow-drift-a/b/c` are **renamed**
+  to `blob-drift-a|b|c` rather than kept: `glow` named a section that no longer
+  exists, and with Work and Skills now static the contact blobs are their only
+  consumer.
 
 ## Testing
 
@@ -233,10 +294,53 @@ Gates: `lint`, `typecheck`, `test`, `build`.
 
 ## Verification
 
-- 320 → 1920, no horizontal overflow at any width.
-- Hero copy (`#f4f4f1` and `#8b8b95`) stays ≥ 4.5:1 over the *brightest* pass
-  of the Grainient field, at every width.
-- Contact's eyebrow, lede and hairline stay ≥ 4.5:1 over the contact blobs.
+**The contrast criterion is per text rectangle, not whole-field.** An earlier
+draft of this spec set a global field p99 luminance target, which cannot survive
+a decision to make the field colourful: a bright field is the point. What is
+actually asserted is that every run of text clears AA against the *worst pixel
+inside its own bounding rect*, sampled across viewports and across the drift
+cycles. The field's own median/p99 luminance is recorded as a description of
+the look, not as a gate.
+
+Method: hide the text with `color: transparent` (layout-preserving, so the rect
+still marks where the glyphs sit), screenshot, then decode the PNG and take the
+worst ratio over every pixel of each rect. Two traps worth recording, both of
+which produced false results first:
+
+- The scroll offset must be pinned and re-checked per frame. `scrollIntoView`
+  plus smooth scrolling left the rects describing a *previous* scroll position,
+  and the samples landed on the portrait — a false 1.39:1 "failure" that was
+  really a bright JPEG.
+- A short viewport cannot scroll far enough to centre a last-section element.
+  Those need `fullPage` capture with page coordinates, not viewport ones.
+
+Results, worst pixel per rect:
+
+| Run                | Size / weight | Worst   | Need  | |
+| ------------------ | ------------- | ------- | ----- | --- |
+| Hero eyebrow       | 11px / 500    | 4.75:1  | 4.5:1 | pass |
+| Hero `h1`          | 36–72px       | 8.14:1  | 3:1   | pass |
+| Hero hook          | 18px          | 6.47:1  | 4.5:1 | pass |
+| Contact eyebrow    | 11px / 500    | 5.85:1  | 4.5:1 | pass |
+| Contact `h2`       | 36px          | 8.96:1  | 3:1   | pass |
+| Contact lede       | 16px          | 5.95:1  | 4.5:1 | pass |
+| Contact email      | 24px          | 4.72:1  | 3:1   | pass |
+| Contact tiles      | 12px          | 4.68:1  | 4.5:1 | pass |
+| Contact tiles, 390 | 12px          | 5.57:1  | 4.5:1 | pass |
+
+Hero figures are worst-case across 1920×1080, 1440×900, 1366×768 and 1280×720 ×
+five frames. Contact figures are worst-case across five frames spanning the
+13s/16s/11s blob drift at 1440×900, plus the mobile tile check above. The
+Contact eyebrow and lede figures are the tightest thing on the page and are
+watched rather than trusted.
+
+Field description, hero at 1440×900: median chroma 138, p50 luminance 0.0394,
+p99 0.0898, mean RGB `[50,24,136]`.
+
+Remaining checks:
+
+- 320 → 1920, no horizontal overflow at any width. **Verified** at 1920, 1440,
+  1280 and 390 — no overflow at any.
 - The `Grainient` field does not band or posterize at 1920.
 - `prefers-reduced-motion`: no drifting blobs, no reveals, one static
   `Grainient` frame, one static aurora frame, and no rAF running.
@@ -244,7 +348,15 @@ Gates: `lint`, `typecheck`, `test`, `build`.
 - WebGL unavailable: the hero falls back to `bg-bg`; the contact blobs and dot
   grid still render, being CSS and 2D canvas.
 - `/projects/[slug]` renders `Contact` too, so it inherits the new background.
-- Clean console.
+  **Verified** on all three slugs: contact present, both canvases, three blobs,
+  aurora band, no overflow, clean console.
+- Clean console. **Verified** on all five routes. The only console error
+  anywhere is the expected 404 on an unknown path.
+- `document.hidden` pausing. **Verified** by instrumenting `requestAnimationFrame`
+  and toggling the property: demand falls from 113 to 74 calls per 600ms with
+  Contact on screen. That is the `DotGrid` cancelling outright — the only one
+  doing a full-viewport 2D repaint per frame — while `SoftAurora` keeps a parked
+  frame and skips its render, which is what its own comment claims.
 
 ## Risks
 

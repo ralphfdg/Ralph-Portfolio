@@ -273,6 +273,18 @@ export default function SoftAurora({
     );
     visibilityObserver.observe(container);
 
+    /* Scrolling away is not the only way to stop being able to see this. The
+       IntersectionObserver entry survives a tab switch unchanged, so a
+       backgrounded tab would keep asking for WebGL renders. The loop here is
+       left parked rather than cancelled — it is one pending frame either way,
+       and the browser clamps it to roughly nothing while the tab is hidden —
+       so gating the draw is what actually saves the work. */
+    let pageVisible = !document.hidden;
+    const handleVisibility = () => {
+      pageVisible = !document.hidden;
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     function handleMouseMove(event: MouseEvent) {
       const rect = canvas.getBoundingClientRect();
       targetMouse = [
@@ -305,7 +317,7 @@ export default function SoftAurora({
 
     function loop(time: number) {
       frame = requestAnimationFrame(loop);
-      if (!visible) return;
+      if (!visible || !pageVisible) return;
       draw(time);
     }
 
@@ -322,6 +334,7 @@ export default function SoftAurora({
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
       if (enableMouseInteraction) {
         canvas.removeEventListener("mousemove", handleMouseMove);
         canvas.removeEventListener("mouseleave", handleMouseLeave);

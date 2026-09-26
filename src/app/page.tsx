@@ -9,17 +9,14 @@ export default function Home() {
     <>
       <Reveal />
       <Hero />
-      {/* The glows are clipped to this wrapper and masked at both ends, so the
-          colour fades in under the hero's aurora and back out before the
-          contact section instead of ending on a hard horizontal seam. The
-          sections above and below are position-relative, so they stay above
-          this layer on the paint order. */}
-      <div data-parallax-scope className="relative">
-        <div aria-hidden className="work-glows" data-parallax="12">
-          <span className="work-glow work-glow--a" />
-          <span className="work-glow work-glow--b" />
-          <span className="work-glow work-glow--c" />
-        </div>
+      {/* Work and Skills share one static wash between them rather than each
+          carrying its own animated blobs. It is the same decoration appearing
+          twice, and this page already runs a shader in the hero and two canvases
+          in the contact section. `relative` is load-bearing: the wash is
+          absolutely positioned, and the sections above and below it are too, so
+          this wrapper is what keeps the wash from stretching to the page. */}
+      <div className="relative">
+        <div aria-hidden className="section-wash" />
         <Projects />
         <Skills />
       </div>

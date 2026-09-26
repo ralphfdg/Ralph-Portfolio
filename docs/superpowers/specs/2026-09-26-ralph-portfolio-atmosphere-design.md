@@ -5,6 +5,16 @@ Status: Approved
 Supersedes nothing. Extends `2026-09-26-ralph-portfolio-design.md`, which remains
 the record of the layout, colour and type system built in the previous pass.
 
+> **Partly superseded for §5 and §6.** The hero ambience described below — the
+> static gradient, the three drifting blobs, the `DotGrid` and the `SoftAurora`
+> band (§5, §6) — no longer lives in the hero. The hero is now a single
+> `Grainient` shader, and the dot grid, the aurora band and the blobs moved to
+> the **contact** section, with Work and Skills reduced to one static wash. See
+> `2026-09-26-ralph-portfolio-grainient-design.md`. The sections below are kept
+> as the record of the decision at the time, including the reasoning that the
+> later pass overturned; §1–§4 and §7 are unaffected and still describe the
+> code as built.
+
 ## Goal
 
 Seven changes, in the order they were requested:

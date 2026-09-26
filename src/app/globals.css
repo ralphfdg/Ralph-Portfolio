@@ -13,6 +13,11 @@
      rather than clinical blue-white. */
   --color-fg: #f4f4f1;
   --color-muted: #8b8b95;
+  /* Body copy that sits on the Grainient field. `muted` cannot: 4.5:1 against
+     #8b8b95 caps the field behind it at 0.019 luminance, which is darker than
+     `accent-deep` and leaves the hero looking switched off. Lifting the text
+     instead of darkening the field is what makes the colour possible. */
+  --color-muted-bright: #c2c4cd;
 
   /* Blue is actionable: links, focus rings, primary button, eyebrows.
      Two steps, because a single mid blue cannot carry both fills and small
@@ -208,78 +213,109 @@
 .rise-in-3 { animation-delay: 240ms; }
 .rise-in-4 { animation-delay: 330ms; }
 
-/* Hero atmosphere ---------------------------------------------------------- */
-/* A static brand-blue wash. `accent-deep` at the top, falling to the page
-   background. */
-.hero-gradient {
+/* Section ambience ---------------------------------------------------------- */
+/* One static wash across Work and Skills. It replaces three animated blobs per
+   section: the same decoration appearing twice, on a page that already runs a
+   shader in the hero and two canvases in the contact section. Soft
+   radial-gradient stops rather than blurred elements, because a large animated
+   `filter: blur()` makes the compositor re-rasterise a full-screen layer every
+   frame while a gradient gives the same edge for free.
+
+   The mask matters more than the gradient. This element spans the bottom edge
+   of the hero and the top of the contact section, and it is at its most opaque
+   right at those edges, so without a fade each boundary would read as a hard
+   horizontal seam. */
+.section-wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background:
     radial-gradient(
-      120% 80% at 50% 0%,
-      var(--color-accent-deep) 0%,
+      120% 60% at 50% 0%,
+      rgb(28 37 71 / 0.6) 0%,
       transparent 62%
     ),
-    linear-gradient(180deg, #0b0b0f 0%, var(--color-bg) 72%);
+    radial-gradient(
+      90% 55% at 50% 100%,
+      rgb(77 111 209 / 0.14) 0%,
+      transparent 66%
+    );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 16%,
+    #000 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 16%,
+    #000 88%,
+    transparent 100%
+  );
 }
 
-/* Three soft blobs drifting on offset cycles. Soft radial-gradient stops rather
-   than blurred elements: a large animated `filter: blur()` makes the compositor
-   re-rasterise a full-screen layer every frame, while a gradient gives the same
-   soft edge for free. Durations are coprime-ish so the composition does not
-   visibly loop. */
-.hero-glows {
+/* Contact ambience --------------------------------------------------------- */
+/* The blobs and the dot lattice that used to stack behind the hero. Same
+   palette, same drift, so the page still reads as one system — only the host
+   changed. Three blobs rather than one because this section is the one place
+   left that has a flat background to sit on, so there is something for them to
+   do. Durations are coprime-ish so the composition does not visibly loop. */
+.contact-glows {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-.hero-glow {
+.contact-blob {
   position: absolute;
   border-radius: 9999px;
   will-change: transform;
 }
 
-.hero-glow--a {
-  width: 44rem;
-  height: 44rem;
+.contact-blob--a {
+  width: 40rem;
+  height: 40rem;
   left: -12rem;
-  top: -16rem;
+  top: -14rem;
   background: radial-gradient(
     circle,
-    rgb(157 180 227 / 0.26) 0%,
+    rgb(157 180 227 / 0.24) 0%,
     transparent 66%
   );
-  animation: glow-drift-a 11s ease-in-out infinite;
+  animation: blob-drift-a 13s ease-in-out infinite;
 }
 
-.hero-glow--b {
+.contact-blob--b {
+  width: 36rem;
+  height: 36rem;
+  right: -12rem;
+  top: 18%;
+  background: radial-gradient(
+    circle,
+    rgb(77 111 209 / 0.28) 0%,
+    transparent 66%
+  );
+  animation: blob-drift-b 16s ease-in-out infinite;
+}
+
+.contact-blob--c {
   width: 38rem;
   height: 38rem;
-  right: -12rem;
-  top: 0;
-  background: radial-gradient(
-    circle,
-    rgb(77 111 209 / 0.3) 0%,
-    transparent 66%
-  );
-  animation: glow-drift-b 14s ease-in-out infinite;
-}
-
-.hero-glow--c {
-  width: 34rem;
-  height: 34rem;
   left: 50%;
-  bottom: -12rem;
-  margin-left: -17rem;
+  bottom: -16rem;
+  margin-left: -19rem;
   background: radial-gradient(
     circle,
-    rgb(107 138 222 / 0.24) 0%,
+    rgb(107 138 222 / 0.22) 0%,
     transparent 68%
   );
-  animation: glow-drift-c 8s ease-in-out infinite;
+  animation: blob-drift-c 11s ease-in-out infinite;
 }
 
-@keyframes glow-drift-a {
+@keyframes blob-drift-a {
   0%,
   100% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -289,7 +325,7 @@
   }
 }
 
-@keyframes glow-drift-b {
+@keyframes blob-drift-b {
   0%,
   100% {
     transform: translate3d(0, 0, 0) scale(1.05);
@@ -299,7 +335,7 @@
   }
 }
 
-@keyframes glow-drift-c {
+@keyframes blob-drift-c {
   0%,
   100% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -310,84 +346,15 @@
 }
 
 /* The band's top edge is masked so the canvas rectangle has no visible seam
-   and the aurora appears to rise out of the page. */
-.hero-aurora {
+   and the aurora appears to rise out of the page. `SoftAurora` fills its
+   parent, so the height here is the band's. */
+.aurora-band {
+  position: absolute;
+  inset-x: 0;
+  bottom: 0;
+  height: 150px;
   -webkit-mask-image: linear-gradient(to top, #000 58%, transparent 100%);
   mask-image: linear-gradient(to top, #000 58%, transparent 100%);
-}
-
-/* Work / Skills ambience --------------------------------------------------- */
-/* The same palette and drift as the hero, so the colour reads as one continuous
-   system rather than a second, unrelated decoration. Only the placement moves:
-   two blobs hug opposite edges and one anchors the middle of the pair. */
-.work-glows {
-  position: absolute;
-  inset: 0;
-  /* Clipping lives here rather than on the page wrapper. Putting it on the
-     wrapper would make the two sections a scroll container, which breaks
-     `position: sticky` for anything inside them. */
-  overflow: hidden;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 14%,
-    #000 86%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 14%,
-    #000 86%,
-    transparent 100%
-  );
-}
-
-.work-glow {
-  position: absolute;
-  border-radius: 9999px;
-  will-change: transform;
-}
-
-.work-glow--a {
-  width: 40rem;
-  height: 40rem;
-  left: -14rem;
-  top: 4%;
-  background: radial-gradient(
-    circle,
-    rgb(157 180 227 / 0.22) 0%,
-    transparent 66%
-  );
-  animation: glow-drift-a 13s ease-in-out infinite;
-}
-
-.work-glow--b {
-  width: 36rem;
-  height: 36rem;
-  right: -13rem;
-  top: 38%;
-  background: radial-gradient(
-    circle,
-    rgb(77 111 209 / 0.26) 0%,
-    transparent 66%
-  );
-  animation: glow-drift-b 16s ease-in-out infinite;
-}
-
-.work-glow--c {
-  width: 42rem;
-  height: 42rem;
-  left: 50%;
-  top: 72%;
-  margin-left: -21rem;
-  background: radial-gradient(
-    circle,
-    rgb(107 138 222 / 0.2) 0%,
-    transparent 68%
-  );
-  animation: glow-drift-c 11s ease-in-out infinite;
 }
 
 /* Screenshot frames --------------------------------------------------------- */

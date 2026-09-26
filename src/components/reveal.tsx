@@ -26,10 +26,9 @@ const REVEAL_END = 55;
 const REVEAL_RISE = 40;
 
 /**
- * Drives every scroll-linked animation on the page: depth on the decorative
- * layers, and progress-bound reveals for the section blocks.
+ * Drives the scroll-linked reveals for the section blocks.
  *
- * Three decisions are load-bearing here.
+ * Two decisions are load-bearing here.
  *
  * Everything scroll-driven lives inside one `matchMedia` context gated on
  * `no-preference`. Under `reduce` the function never runs, so no inline opacity
@@ -38,11 +37,13 @@ const REVEAL_RISE = 40;
  * only thing between a reduced-motion reader and an invisible page — and it
  * fails safe, because no JavaScript also means no hidden state.
  *
- * A parallax rate moves the *wrapper*, never the animated child. The hero and
- * work glows drift on infinite `glow-drift-*` keyframes, and a running CSS
- * animation outranks an inline transform, so translating a glow directly would
- * be silently discarded. Moving the container and letting the children keep
- * drifting composes the two instead of fighting them.
+ * This used to drive scroll-scrubbed parallax on the decorative layers too,
+ * which needed the layer's wrapper to be a real ancestor to measure against and
+ * a `yPercent` on a child that already had a running CSS animation competing for
+ * the same transform. Both of those layers are gone: the hero is one shader
+ * that animates itself, and the section ambience is either a static gradient or
+ * inside the contact section's clipped backdrop. Nothing on the page
+ * translates on scroll any more, so the engine went with it.
  *
  * `data-reveal` belongs to this module alone. The project cards used to share the
  * attribute for their hover animation, which put two libraries on the same
@@ -59,37 +60,6 @@ export function Reveal() {
     const mm = gsap.matchMedia();
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
-      for (const el of root.querySelectorAll<HTMLElement>("[data-parallax]")) {
-        const rate = Number.parseFloat(el.dataset.parallax ?? "");
-        if (!Number.isFinite(rate) || rate === 0) continue;
-
-        /*
-         * The scope is what the layer travels across, and it has to be a real
-         * ancestor. Every parallax target is an absolutely positioned
-         * decoration, so measuring against the element itself would resolve to a
-         * zero-length scroll range and leave it stuck at 0%.
-         */
-        const scope = el.closest<HTMLElement>("[data-parallax-scope]") ?? el;
-
-        gsap.fromTo(
-          el,
-          { yPercent: 0 },
-          {
-            yPercent: rate,
-            /* Linear is the point. A scrub maps scroll position to progress; an
-               ease would make the layer lag behind the scroll and then catch up,
-               which reads as the page fighting the reader. */
-            ease: "none",
-            scrollTrigger: {
-              trigger: scope,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          },
-        );
-      }
-
       for (const el of root.querySelectorAll<HTMLElement>("[data-reveal]")) {
         /*
          * A lag shifts the end of the window rather than delaying a tween.
