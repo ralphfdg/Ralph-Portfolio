@@ -279,10 +279,16 @@ The timeline runs inside `useEffect` after mount, so server-rendered HTML is com
 before any transform applies. This avoids a flash of unstyled content and avoids a
 hydration mismatch.
 
-The hidden initial state is declared inside a `@media (prefers-reduced-motion:
-no-preference)` block in CSS rather than inline in JSX. Visitors with reduced motion
-set, and visitors whose JavaScript fails, both get fully visible content. The
-animation enhances an already-rendered page instead of gating it.
+The hidden initial state is applied from JavaScript with `utils.set` inside a
+layout effect, never from CSS. An earlier draft put `[data-anim] { opacity: 0 }`
+inside a `@media (prefers-reduced-motion: no-preference)` block. That fails: a
+browser with JavaScript disabled still reports `no-preference`, so the rule applied
+and nothing ever revealed the hero. A test with JavaScript disabled caught a fully
+invisible hero. Setting the from-state from the script keeps the content readable by
+default, so the animation only ever enhances a page that is already legible.
+
+Reduced-motion visitors are detected in the same effect and skipped entirely, which
+leaves the hero exactly as the server rendered it.
 
 Cleanup calls `.revert()` on the animation instance so an unmount mid-timeline does
 not leave orphaned transforms.
@@ -290,7 +296,7 @@ not leave orphaned transforms.
 ## Accessibility
 
 - Skip link as the first focusable element
-- `prefers-reduced-motion` honored through the media query gate described above
+- `prefers-reduced-motion` honored by skipping the animation entirely
 - Status badges carry text, so color is never the only signal
 - Form errors reference their input through `aria-describedby`; the error summary
   carries `role="alert"`

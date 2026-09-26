@@ -31,8 +31,10 @@ Resend, Vercel, Vitest.
   self-hosted woff2 in `src/app/fonts/`.
 - Anybody is a variable font with a `wdth` axis. `next/font/google` must declare
   `axes: ['wdth']`, otherwise width values will not bind.
-- Reduced motion and no-JS visitors must both see the hero content. Never gate
-  visibility behind JavaScript.
+- Reduced motion and no-JS visitors must both see the hero content. Never hide
+  content in CSS and rely on JavaScript to reveal it. Set animation from-states from
+  the script, in a layout effect, and skip the animation entirely under
+  `prefers-reduced-motion`.
 - Two accents, strictly assigned. Blue means actionable, amber means incomplete.
 
 ## Design Tokens
@@ -396,38 +398,47 @@ git commit -m "feat: add page shell with nav, footer, and section primitive"
 - Produces: `Hero()` server component rendering static content
 - Produces: `HeroMotion({ children })` client island
 
-- [ ] **Step 1: Declare the hidden initial state in CSS**
+- [ ] **Step 1: Leave the hidden initial state out of CSS**
 
-In `globals.css`, inside `@media (prefers-reduced-motion: no-preference)`, set
-`[data-anim] { opacity: 0; }`. Outside that media query the content stays visible,
-so reduced-motion and no-JS visitors both read the hero.
+Do not add `[data-anim] { opacity: 0 }` to `globals.css`, even inside a
+`@media (prefers-reduced-motion: no-preference)` block. A browser with JavaScript
+disabled reports `no-preference`, so the rule would apply and nothing would ever
+reveal the hero, leaving it blank. Step 2 applies the from-state from the script
+instead, before paint.
 
 - [ ] **Step 2: Write `hero-motion.tsx`**
 
 ```tsx
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { createTimeline, stagger, utils } from 'animejs'
+
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 export function HeroMotion({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const root = ref.current
     if (!root) return
+
     const targets = root.querySelectorAll<HTMLElement>('[data-anim]')
     if (targets.length === 0) return
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduced) {
-      utils.set(targets, { opacity: 1 })
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return
     }
 
-    const timeline = createTimeline({ defaults: { ease: 'outExpo', duration: 700 } })
+    utils.set(targets, { opacity: 0, translateY: 28 })
+
+    const timeline = createTimeline({
+      defaults: { ease: 'outExpo', duration: 700 },
+    })
+
     timeline
-      .add(targets, { opacity: [0, 1], translateY: [24, 0], delay: stagger(90) }, 0)
+      .add(targets, { opacity: [0, 1], translateY: [28, 0], delay: stagger(90) }, 0)
       .init()
 
     return () => {
@@ -453,9 +464,22 @@ the `download` attribute. Mark animated elements with `data-anim`.
 
 - [ ] **Step 5: Verify in the browser**
 
-Run `npm run dev`. Confirm the hero animates, that
-`prefers-reduced-motion: reduce` shows it fully, and that disabling JavaScript still
-shows it. Screenshot each case.
+Run `npm run dev`. Then check all three paths, because two of them are the whole
+point of the approach:
+
+- Normal: the hero staggers in, and every target reaches opacity 1
+- `prefers-reduced-motion: reduce`: the hero is fully visible and never animates
+- **JavaScript disabled: the hero is fully visible.** This is the case a CSS
+  hidden state breaks, and it needs its own browser context to test:
+
+```ts
+const ctx = await browser.newContext({ javaScriptEnabled: false })
+const page = await ctx.newPage()
+await page.goto('http://localhost:3000')
+// assert every [data-anim] target computes to opacity 1
+```
+
+Screenshot each case.
 
 - [ ] **Step 6: Commit**
 
