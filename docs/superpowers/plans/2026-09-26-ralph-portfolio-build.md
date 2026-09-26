@@ -2,13 +2,24 @@
 
 > **Superseded in part — read this first.** This document is the original execution
 > plan and is kept as the record of how the page was first built. Its motion
-> sections no longer describe the shipped hero. What actually ships:
+> sections no longer describe the shipped page. What actually ships:
 >
-> - **Hero motion is GSAP, not Anime.js.** `animejs` was removed and
->   `hero-motion.tsx` deleted. The hero background is `src/components/dot-grid.tsx`,
->   a React Bits `DotGrid` adapted for this codebase, using `gsap@^3.15` and
->   `gsap/InertiaPlugin`. See the Motion section of the spec for the prop values and
->   the four deliberate departures from upstream.
+> - **Two animation libraries, split by job.** The hero lattice is **GSAP**
+>   (`gsap@^3.15` + `InertiaPlugin`) in `src/components/dot-grid.tsx`. The
+>   project-card hover is **Anime.js** (`animejs@^4.5`) in
+>   `src/components/project-card.tsx`. The original plan used Anime.js for a hero
+>   timeline; that timeline and `hero-motion.tsx` are gone.
+> - **The hero is a single centred column**, no portrait. `src/components/hero.tsx`
+>   renders the eyebrow, name, hook, and two CTAs centred, with the DotGrid
+>   full-bleed behind them.
+> - **`CursorGrid` has been deleted**, along with its fixed canvas and its CSS and
+>   the `z-10` on `<main>` that only existed to sit above it.
+> - **Skills is two equal columns**: the authored skill list on the left, a React
+>   Bits `InfiniteSpiral` on the right (`infinite-spiral.tsx` + `skill-spiral.tsx`).
+>   Skill marks live in `src/lib/content/skill-marks.ts` and the SVGs in
+>   `public/logos/`. See the Motion section of the spec for the six deliberate
+>   departures from upstream and for why the logo fills are baked rather than
+>   `currentColor`.
 > - **`src/components/shape-waves.tsx` and its CSS have been deleted** as dead
 >   source. The `vgpu` dependency is deliberately **retained** and is now unused —
 >   it ships no bundle, since nothing imports it.
@@ -708,3 +719,25 @@ Run `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. Check keyb
 order, visible focus, reduced motion, and alt text. Then deploy to Vercel, attach the
 domain, and complete Resend sending-domain DNS verification. The contact form cannot
 deliver real mail until that DNS step is done.
+
+---
+
+## Addendum: content, icon and atmosphere pass (2026-09-26)
+
+The spiral marks described above are no longer brand-coloured logos on a light
+plate, and the skill set is no longer 25. Three further documents record the
+current state, and they win over this log where the two disagree:
+
+- `docs/superpowers/specs/2026-09-26-ralph-portfolio-atmosphere-design.md` — the
+  approved design for the content, icon and hero changes.
+- `docs/superpowers/plans/2026-09-26-ralph-portfolio-atmosphere.md` — the task
+  breakdown that was executed.
+- `docs/superpowers/specs/2026-09-26-ralph-portfolio-design.md` — the standing
+  design record, which is the authoritative source for how the site looks now.
+
+What changed, in short: the skill list is the 23 entries that have a brand mark
+(`SQL`, `Azure Services` and the whole cloud group were removed); each mark
+carries its own fill at full bleed with no plate, and `logo-colors.test.ts` holds
+all 23 above 3:1 on the `#17171c` card; section copy is warmer and the visible
+naming is Work rather than Projects; and the hero gained a gradient wash, three
+drifting glow blobs and a `SoftAurora` band in place of its bottom border.

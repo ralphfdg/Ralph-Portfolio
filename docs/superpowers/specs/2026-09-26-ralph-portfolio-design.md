@@ -16,35 +16,51 @@ section wherever the two disagree.
 | Visual language | Light paper, editorial, serif/sans | Dark geometric, terminal-inspired |
 | Display face | Anybody | **Michroma** (400 only — never `font-bold`) |
 | Text face | Satoshi (local) + Azeret Mono | **JetBrains Mono** for body and mono |
-| Motion | Anime.js v4 hero timeline | **GSAP 3.15 / `InertiaPlugin`** dot lattice + CSS |
-| Hero background | None | React Bits `DotGrid` canvas, hero-only |
-| Hero portrait | None | Formal photo, hero right, full colour, square corners |
-| Global accent | None | Cursor-reactive `CursorGrid` behind all content, **excluded from the hero** |
+| Motion | Anime.js v4 hero timeline | **GSAP 3.15 (`InertiaPlugin`)** hero lattice + **Anime.js 4.5** card hover |
+| Hero background | None | `DotGrid` lattice over a CSS gradient wash and three drifting glow blobs, with a `SoftAurora` band at the bottom edge |
+| Hero layout | None | Single centred column: eyebrow, name, hook, two CTAs |
+| Projects layout | Flat 2-column grid | **Mosaic**: first project spans the full row and lays out sideways from `md`; the rest share the row beneath |
+| Skills layout | Chip grid in 3 columns | **Two equal columns**: skill list left, React Bits `InfiniteSpiral` right |
+| Spiral marks | None | **Full-bleed brand-coloured logos**; monogram branch kept for future skills |
 | Section nav | Static links | `GooeyNav`, outlined below `sm` |
 | Shape language | Rounded, paper cards | Square corners; rounded hero pills kept on purpose |
 
 **Tokens.** `bg #08080a`, `surface #101014`, `surface-2 #17171c`, `line #26262e`,
 `fg #f4f4f1`, `muted #8b8b95`, `accent #4d6fd1`, `accent-bright #9db4e3`,
-`accent-deep #1c2547`, `status-wip #e08a3c`. Content sits at `z-10`; the cursor
-layer is `z-0` and `pointer-events: none`.
+`accent-deep #1c2547`, `status-wip #e08a3c`. The `line-soft` token is currently
+unused and a candidate for removal.
 
 **Rounded pills are intentional.** The hero CTAs are the only rounded elements in
 the site, kept as the one piece of soft contrast against the geometry. Do not
 normalise them away in a later pass.
 
-**The two dot fields never overlap.** `DotGrid` is scoped to `#top` and
-`CursorGrid` is fixed page-wide, so the hero paints its own opaque background
-(`bg #08080a` at `z-10`) over the `z-0` cursor layer. This is structural, not
-incidental: do not make the hero background transparent, or the 44px cursor
-lattice will show through the 24px hero lattice. Measured: hero spacing 24.01px,
-cursor spacing 44px, distinct composite values.
+**The hero is a single centred column.** No portrait, no second column. The name
+and hook are centred on the vertical axis, and the lattice runs full-bleed behind
+them. The `DotGrid` canvas fills the hero from its own box via `ResizeObserver`, so
+the field is never cropped on one axis or the other.
 
 **The hero grid is decorative and optional.** `DotGrid` must never be
-load-bearing. The hero copy and portrait are real DOM, the canvas is
+load-bearing. The hero copy is real DOM, the canvas is
 `aria-hidden` and `pointer-events: none`, and reduced motion draws one static
 frame. The canvas sizes itself from the hero box via `ResizeObserver`, so the
 lattice always fills the hero exactly — a fixed or intrinsic canvas size crops
 the field on one axis or the other.
+
+**The hero's bottom border is gone, replaced by an aurora band.** `border-b
+border-line` was a hard hairline that cut the hero off from the page. A
+`SoftAurora` band now occupies the bottom ~150px of the hero, masked at its top
+edge so the canvas rectangle has no visible seam and the glow appears to rise out
+of the page. Behind the lattice sit a static blue gradient wash and three soft
+blobs drifting on 8s, 11s and 14s cycles — those three durations share no common
+factor worth noticing, so the composition does not visibly loop. The blobs are
+`radial-gradient` stops rather than blurred elements: a large animated
+`filter: blur()` makes the compositor re-rasterise a full-screen layer every
+frame. Every decorative layer sits inside one `absolute inset-0` wrapper, so the
+copy is unambiguously above all of them and cannot be overlapped by a canvas that
+happens to be taller than expected. The band is `pointer-events-none`, takes no
+mouse input, pauses its render loop when scrolled out of view, and fails quietly
+where WebGL is unavailable, leaving the gradient and the glows to carry the hero
+on their own.
 
 ## Goal
 
@@ -249,14 +265,15 @@ src/
       [slug]/
         page.tsx             RSC  generateStaticParams, generateMetadata
   components/
-    cursor-grid.tsx            client  fixed pointer-reactive canvas, page-wide
     dot-grid.tsx               client  React Bits DotGrid, hero-only, GSAP inertia
     gooey-nav.tsx              client  SVG filter + section observer
-    hero.tsx                   RSC    shell, two-column copy + portrait
+    hero.tsx                   RSC    centred copy shell
+    infinite-spiral.tsx        client  React Bits InfiniteSpiral, adapted (see Motion)
+    skill-spiral.tsx           client  binds authored skills to spiral cards
     projects.tsx               RSC    maps featured projects to cards
-    project-card.tsx           RSC    status badge, conditional links
+    project-card.tsx           client  status badge, links, Anime.js hover
     project-detail.tsx         RSC    shared template, optional slots
-    skills.tsx                 RSC
+    skills.tsx                 RSC    two equal columns: list + spiral
     contact-section.tsx        RSC
     contact-form.tsx           client  useActionState
     icon.tsx                   RSC    inline SVG set
@@ -357,10 +374,67 @@ rejection, with no detail about which check fired.
   there is no velocity to accelerate. `resistance` is not a prop here; it is a
   fixed value on the shockwave tween's `inertia`. Clicking a control over
   the grid must not fire the shockwave.
-- `CursorGrid` — a fixed, `pointer-events: none` canvas that redraws on
-  window-level `pointermove` only. No `requestAnimationFrame` loop, so an idle
-  page costs nothing. Deliberately excluded from the hero by the hero's own
-  opaque background.
+- `InfiniteSpiral` — the skills helix, a React Bits component adapted for this
+  codebase. Auto-drifts, is draggable, and responds to page scroll. Seven
+  deliberate departures from upstream, all load-bearing: the redraw loop stops
+  when the spiral scrolls off screen (upstream reschedules
+  `requestAnimationFrame` unconditionally forever and only zeroes the auto-speed,
+  so an invisible spiral still burns a frame per tick); `items` must be
+  referentially stable or the effect re-runs every render; cards are dark panels
+  with a hairline border rather than upstream's translucent white, which would
+  invert the contrast on a near-black page; images use `contain` with padding,
+  because `cover` crops a square brand mark to its corners; raw `<img>` carries a
+  scoped `no-img-element` exemption, because `next/image` injects its own
+  wrapper and intrinsic sizing that fights the per-frame transform; the component
+  checks `prefers-reduced-motion` itself, since the global CSS rule only
+  clamps CSS durations and this is driven by inline styles from JavaScript; and
+  every card ships at `opacity-0`, because the cards are absolutely centred in
+  the server-rendered markup and the transforms that spread them along the helix
+  are written by the first animation frame — without that default, a
+  no-JavaScript visit stacks all 25 cards on one pixel as a single opaque pile.
+  The first `render` pass assigns an inline opacity to every card, which outranks
+  the class, so the pile is never painted.
+- **Spiral marks are brand-coloured, on a light plate.** The mark is a brand
+  asset, so it carries the brand's own hex. Measured against the `surface-2`
+  card, several of those hexes are not legible: Next.js `#000000` sits at 1.2:1,
+  GitHub `#181717` and Express `#0A0A0A` at about 1:1, SQLite `#003B57` at
+  1.5:1, while React and JavaScript reach 11:1 and 13:1. The mark now carries its
+  brand fill directly and fills the whole card, with no plate behind it. The three
+  monochrome brands (Next.js, GitHub, Express) ship the white those brands
+  actually use for dark mode, and C#, CSS3, Flutter and SQLite were lightened
+  until they cleared the same bar. `logo-colors.test.ts` holds all 23 marks above
+  3:1 on the `#17171c` card fill, asserts the exact asset count, and rejects any
+  mark that still relies on `currentColor`, so a regression fails the build
+  rather than shipping.
+- **Monogram fallback.** A skill with no mark renders its name as real text, so
+  it inherits the page's colour tokens and survives a palette change. The skill
+  set was trimmed to the 23 that each have a brand mark, so nothing needs a
+  monogram today; the branch stays in `getSkillMark` as the landing spot for the
+  next skill that has no mark yet. A monogram is text and needs no plate to be
+  legible.
+- `SkillSpiral` frame — no border and no fixed height. The frame matches whatever
+  height the grid row resolves to, which the skill list beside it sets. The
+  `min-h` is a floor, not a height: the cards are absolutely positioned and add
+  no height, so once the fixed heights came off a mobile frame (alone in its row)
+  resolved to zero and `overflow-hidden` clipped the whole spiral away. A
+  min-height can only raise the frame, so it never caps the desktop stretch.
+- `ProjectCard` mosaic — the first project spans the full row and lays out
+  sideways from `md`, image left and text right, with the rest sharing the row
+  beneath. One dominant tile, no masonry maths, and no dependence on how many
+  projects exist. Laying the tile out sideways is what makes it work: a wide
+  screenshot inside a full-width 16:10 box would be far taller than its box,
+  where at half width the image lands at 1.63:1 against the screenshot's native
+  1.6:1 and is barely cropped. `priority` is inert in this Next version, so the
+  eager-loading hint is set by hand via `loading`/`fetchPriority`; `sizes` differs
+  per variant, since the feature image is half the row and a standard image is
+  half a column.
+- `ProjectCard` hover — Anime.js 4.5. Image scales and brightens, the card lifts
+  `-4px`, and the ordinal, title, hook, and stack list rise and un-dim on a
+  stagger. **Anime.js owns transform, opacity and filter; CSS keeps owning colour
+  and border.** Mixing the two on one property makes them fight. Hover animation
+  is skipped entirely under `prefers-reduced-motion` and under `(hover: none)`,
+  where the card's CSS border colour is the only feedback. The global reduced-motion
+  rule cannot do this job, because Anime.js writes inline styles from JavaScript.
 - `GooeyNav` — CSS/SVG filter on the section list, with the goo dropped below
   `sm` because the white pill and its dark label both assume the filter exists.
 
