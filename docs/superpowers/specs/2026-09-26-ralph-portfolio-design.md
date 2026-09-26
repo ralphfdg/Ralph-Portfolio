@@ -2,6 +2,49 @@
 
 Date: 2026-09-26
 Status: Approved in conversation, pending written review
+Revised: 2026-09-26 — visual layer superseded by the dark geometric redesign below
+
+## Redesign addendum (2026-09-26)
+
+The original paper/editorial visual direction is **superseded**. The content
+contract, route architecture, contact flow, and accessibility rules further down
+still stand; the type, colour, and motion decisions below are replaced by this
+section wherever the two disagree.
+
+| Concern | Original | Now |
+|---|---|---|
+| Visual language | Light paper, editorial, serif/sans | Dark geometric, terminal-inspired |
+| Display face | Anybody | **Michroma** (400 only — never `font-bold`) |
+| Text face | Satoshi (local) + Azeret Mono | **JetBrains Mono** for body and mono |
+| Motion | Anime.js v4 hero timeline | **GSAP 3.15 / `InertiaPlugin`** dot lattice + CSS |
+| Hero background | None | React Bits `DotGrid` canvas, hero-only |
+| Hero portrait | None | Formal photo, hero right, full colour, square corners |
+| Global accent | None | Cursor-reactive `CursorGrid` behind all content, **excluded from the hero** |
+| Section nav | Static links | `GooeyNav`, outlined below `sm` |
+| Shape language | Rounded, paper cards | Square corners; rounded hero pills kept on purpose |
+
+**Tokens.** `bg #08080a`, `surface #101014`, `surface-2 #17171c`, `line #26262e`,
+`fg #f4f4f1`, `muted #8b8b95`, `accent #4d6fd1`, `accent-bright #9db4e3`,
+`accent-deep #1c2547`, `status-wip #e08a3c`. Content sits at `z-10`; the cursor
+layer is `z-0` and `pointer-events: none`.
+
+**Rounded pills are intentional.** The hero CTAs are the only rounded elements in
+the site, kept as the one piece of soft contrast against the geometry. Do not
+normalise them away in a later pass.
+
+**The two dot fields never overlap.** `DotGrid` is scoped to `#top` and
+`CursorGrid` is fixed page-wide, so the hero paints its own opaque background
+(`bg #08080a` at `z-10`) over the `z-0` cursor layer. This is structural, not
+incidental: do not make the hero background transparent, or the 44px cursor
+lattice will show through the 24px hero lattice. Measured: hero spacing 24.01px,
+cursor spacing 44px, distinct composite values.
+
+**The hero grid is decorative and optional.** `DotGrid` must never be
+load-bearing. The hero copy and portrait are real DOM, the canvas is
+`aria-hidden` and `pointer-events: none`, and reduced motion draws one static
+frame. The canvas sizes itself from the hero box via `ResizeObserver`, so the
+lattice always fills the hero exactly — a fixed or intrinsic canvas size crops
+the field on one axis or the other.
 
 ## Goal
 
@@ -33,7 +76,7 @@ form (Zod + Server Action + Resend) rather than through claims about backend ski
 |---|---|---|
 | Framework | Next.js App Router + TypeScript | Verify the current stable major at install |
 | Styling | Tailwind CSS v4 | CSS-first config. No `tailwind.config.js`; tokens live in `@theme` |
-| Motion | Anime.js v4 (`^4.3.0`) | v4 is a rewrite. See API constraints below |
+| Motion | GSAP 3.15 (`gsap` + `gsap/InertiaPlugin`) | Replaces Anime.js. See the redesign addendum and the motion notes below |
 | Validation | Zod v4 (`^4`) | Used for both the contact form and a build-time content check |
 | Email | Resend | Requires a verified sending domain in production |
 | Hosting | Vercel | GitHub push to deploy |
@@ -44,7 +87,31 @@ These three libraries changed their APIs in recent majors. Most generated code a
 most tutorials target the older API and will fail. Pin the majors and write against
 the current surface.
 
-**Anime.js v4**
+**GSAP 3.15** (current hero motion)
+- Import from the package root: `import gsap from "gsap"` and `import { InertiaPlugin } from "gsap/InertiaPlugin"`. Types ship in `gsap/types`.
+- All former Club plugins, `InertiaPlugin` included, are in the public npm package from 3.13 onward. No Club membership, token, or private registry.
+- Register the plugin **inside the effect**, not at module scope, so nothing GSAP-related has to be SSR-safe during module evaluation.
+- `inertia` is an object, not a boolean: `inertia: { resistance: 750 }`. `inertia: true` does not typecheck (`TS2322: boolean is not assignable to InertiaVars`) and does not configure the plugin.
+
+**vgpu 0.5.0 — installed, but the hero no longer uses it**
+The hero moved to `DotGrid`. `shape-waves.tsx` and its CSS were then deleted as
+dead source, but the `vgpu` dependency is deliberately retained, so the
+implementation is recoverable without a reinstall if it is ever wanted back.
+`vgpu` is now an unused dependency: it ships no bundle, because nothing imports
+it. The notes below are the reason the old renderer was dropped, and the reason
+it would need fixing before it could return.
+
+- Its canvas sizes itself from a WGSL-computed height, so it rendered ~712px tall
+  inside a ~554px hero and cropped. That is the defect that ended its use here.
+
+- Import from the package root: `import { init, effect, frame, frameLoop, surface, texture, sampler, clock } from "vgpu"`. The `vgpu/client` subpath only exports the Vite WGSL plugin and types, not the runtime API.
+- `vgpu` is pre-1.0. Pin the exact version; do not use a caret range.
+- Node-only imports are confined to `vgpu/node`; the root entry stays browser-safe, which is what makes it work in a Next client component.
+- `DrawOptions.shader` accepts a raw WGSL string. The documented `.wgsl` + Vite plugin path does not apply under Next, so the shader is inlined.
+- Surface targets exist only inside `frame(gpu, ...)`. Calling `wave.draw(surface)` directly throws `Surface targets are only available inside frame(gpu)`.
+- `init()` rejects when no adapter is available. Always catch it; an un-awaited call becomes an unhandled rejection and shows up as a console error.
+
+**Anime.js v4** — removed, kept for history only
 - Named imports only: `import { animate, stagger, createTimeline, utils } from 'animejs'`
 - No default export. `anime({...})` and `anime.timeline()` do not exist in v4
 - `ease`, not `easing`
@@ -182,15 +249,17 @@ src/
       [slug]/
         page.tsx             RSC  generateStaticParams, generateMetadata
   components/
-    hero.tsx                  RSC  shell, renders static content
-    hero-motion.tsx           client  Anime.js timeline
-    projects.tsx              RSC  maps featured projects to cards
-    project-card.tsx          RSC  status badge, conditional links
-    project-detail.tsx        RSC  shared template, optional slots
-    skills.tsx                RSC
-    contact-section.tsx       RSC
-    contact-form.tsx          client  useActionState
-    icon.tsx                  RSC  inline SVG set
+    cursor-grid.tsx            client  fixed pointer-reactive canvas, page-wide
+    dot-grid.tsx               client  React Bits DotGrid, hero-only, GSAP inertia
+    gooey-nav.tsx              client  SVG filter + section observer
+    hero.tsx                   RSC    shell, two-column copy + portrait
+    projects.tsx               RSC    maps featured projects to cards
+    project-card.tsx           RSC    status badge, conditional links
+    project-detail.tsx         RSC    shared template, optional slots
+    skills.tsx                 RSC
+    contact-section.tsx        RSC
+    contact-form.tsx           client  useActionState
+    icon.tsx                   RSC    inline SVG set
   lib/
     content/
       projects.ts
@@ -272,26 +341,35 @@ rejection, with no detail about which check fired.
 
 ## Motion
 
-Anime.js drives the hero only. One `createTimeline` staggers the name, the title, the
-hook, and the two buttons.
+**Superseded — see the redesign addendum.** Anime.js was removed from
+`package.json` and `hero-motion.tsx` deleted. Animation is now split three ways:
 
-The timeline runs inside `useEffect` after mount, so server-rendered HTML is complete
-before any transform applies. This avoids a flash of unstyled content and avoids a
-hydration mismatch.
+- `DotGrid` — the hero lattice, a React Bits component adapted for this codebase.
+  `dotSize 3`, `gap 24`, `base #2A3350`, `active #9DB4E3`, `proximity 120`, so it
+  reads as a fine background texture rather than a second foreground. Colours
+  must be 6-digit hex literals: the parser cannot read a CSS custom property and
+  silently yields black. Four deliberate departures from upstream — the root is
+  `pointer-events: none` with effects driven by a `window` listener gated to the
+  canvas rect; reduced motion draws one static frame and never binds a listener;
+  the `requestAnimationFrame` loop is gated on the hero being on screen; and the
+  prop surface is a subset, since upstream's `speedTrigger` and `maxSpeed` drive a
+  cursor-speed response this grid does not want — the follow is a GSAP tween, so
+  there is no velocity to accelerate. `resistance` is not a prop here; it is a
+  fixed value on the shockwave tween's `inertia`. Clicking a control over
+  the grid must not fire the shockwave.
+- `CursorGrid` — a fixed, `pointer-events: none` canvas that redraws on
+  window-level `pointermove` only. No `requestAnimationFrame` loop, so an idle
+  page costs nothing. Deliberately excluded from the hero by the hero's own
+  opaque background.
+- `GooeyNav` — CSS/SVG filter on the section list, with the goo dropped below
+  `sm` because the white pill and its dark label both assume the filter exists.
 
-The hidden initial state is applied from JavaScript with `utils.set` inside a
-layout effect, never from CSS. An earlier draft put `[data-anim] { opacity: 0 }`
-inside a `@media (prefers-reduced-motion: no-preference)` block. That fails: a
-browser with JavaScript disabled still reports `no-preference`, so the rule applied
-and nothing ever revealed the hero. A test with JavaScript disabled caught a fully
-invisible hero. Setting the from-state from the script keeps the content readable by
-default, so the animation only ever enhances a page that is already legible.
-
-Reduced-motion visitors are detected in the same effect and skipped entirely, which
-leaves the hero exactly as the server rendered it.
-
-Cleanup calls `.revert()` on the animation instance so an unmount mid-timeline does
-not leave orphaned transforms.
+The lesson from the original Anime.js timeline carries over and is worth keeping:
+**the hidden initial state must be set from JavaScript, never from CSS.** A
+`@media (prefers-reduced-motion: no-preference)` rule that starts content at
+`opacity: 0` makes the page permanently invisible with JavaScript disabled,
+because such a browser still reports `no-preference`. The hero is server-rendered
+and readable by default; motion only ever enhances it.
 
 ## Accessibility
 
@@ -333,7 +411,7 @@ content schema violation fails the build.
 
 | # | Phase | Exit condition |
 |---|---|---|
-| 0 | Scaffold Next.js, TypeScript, Tailwind v4. Pin `animejs@^4.3.0`, `zod@^4` | App builds and serves |
+| 0 | Scaffold Next.js, TypeScript, Tailwind v4. Pin `zod@^4` (motion lib: `gsap@^3.15`) | App builds and serves |
 | 1 | `content/schema.ts`, `site.ts`, three project stubs, validation test | Content tests pass |
 | 2 | Layout, `@theme` tokens, `next/font`, skip link | Shell renders |
 | 3 | Hero and `hero-motion.tsx` | Hero animates, reduced motion respected |

@@ -40,10 +40,10 @@ function Block({
 
   return (
     <div className="mt-10">
-      <h2 className="type-eyebrow border-b border-line pb-3 text-accent">
+      <h2 className="type-eyebrow border-b border-line pb-3 text-accent-bright">
         {heading}
       </h2>
-      <p className="mt-4 max-w-2xl leading-relaxed text-ink">{children}</p>
+      <p className="mt-4 max-w-2xl leading-relaxed text-fg">{children}</p>
     </div>
   );
 }
@@ -55,12 +55,12 @@ function ProjectDetail({ project }: { project: Project }) {
         <div className="mx-auto w-full max-w-5xl px-6 py-16 md:py-20">
           <Link
             href="/#work"
-            className="font-mono text-xs uppercase tracking-[0.12em] text-muted underline-offset-4 hover:text-accent hover:underline"
+            className="font-mono text-xs uppercase tracking-[0.12em] text-muted underline-offset-4 hover:text-accent-bright hover:underline"
           >
             Back to work
           </Link>
 
-          <h1 className="type-display mt-6 text-4xl font-bold leading-tight text-ink md:text-5xl">
+          <h1 className="type-display mt-6 text-4xl leading-tight text-fg md:text-5xl">
             {project.title}
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
@@ -71,7 +71,7 @@ function ProjectDetail({ project }: { project: Project }) {
             {project.stack.map((item) => (
               <li
                 key={item}
-                className="border border-line px-2.5 py-1 font-mono text-xs text-ink"
+                className="border border-line px-2.5 py-1 font-mono text-xs text-fg"
               >
                 {item}
               </li>
@@ -84,7 +84,7 @@ function ProjectDetail({ project }: { project: Project }) {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="font-mono text-xs uppercase tracking-[0.12em] text-accent underline-offset-4 hover:underline"
+                  className="font-mono text-xs uppercase tracking-[0.12em] text-accent-bright underline-offset-4 hover:underline"
                 >
                   {link.label}
                 </a>
@@ -95,7 +95,7 @@ function ProjectDetail({ project }: { project: Project }) {
       </header>
 
       <div className="mx-auto w-full max-w-5xl px-6 py-14">
-        <div className="relative aspect-16/9 overflow-hidden border border-line bg-accent-tint">
+        <div className="relative aspect-16/9 overflow-hidden border border-line bg-accent-deep">
           <Image
             src={project.screenshot.src}
             alt={project.screenshot.alt}
@@ -107,7 +107,7 @@ function ProjectDetail({ project }: { project: Project }) {
         </div>
 
         <div className="mt-12 max-w-2xl">
-          <p className="text-base leading-relaxed text-ink">{project.summary}</p>
+          <p className="text-base leading-relaxed text-fg">{project.summary}</p>
         </div>
 
         <Block heading="The problem">{project.problem}</Block>
@@ -116,13 +116,13 @@ function ProjectDetail({ project }: { project: Project }) {
 
         {project.decisions && project.decisions.length > 0 && (
           <div className="mt-10">
-            <h2 className="type-eyebrow border-b border-line pb-3 text-accent">
+            <h2 className="type-eyebrow border-b border-line pb-3 text-accent-bright">
               Key decisions
             </h2>
             <dl className="mt-6 space-y-6">
               {project.decisions.map((decision) => (
                 <div key={decision.heading}>
-                  <dt className="type-display text-lg font-bold text-ink">
+                  <dt className="type-display text-lg text-fg">
                     {decision.heading}
                   </dt>
                   <dd className="mt-2 max-w-2xl leading-relaxed text-muted">

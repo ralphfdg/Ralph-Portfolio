@@ -1,24 +1,35 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Surfaces */
-  --color-paper: #f6f6f3;
-  --color-ink: #0b0b0c;
-  --color-line: #e2e1dc;
-  --color-muted: #6b6a66;
+  /* Surfaces. Dark-first: the page is near-black, panels sit one step up,
+     and hairlines are light-on-dark rather than dark-on-light. */
+  --color-bg: #08080a;
+  --color-surface: #101014;
+  --color-surface-2: #17171c;
+  --color-line: #26262e;
+  --color-line-soft: #1a1a20;
 
-  /* Blue is actionable: links, focus rings, primary button, eyebrows */
-  --color-accent: #425b9a;
-  --color-accent-strong: #33477d;
-  --color-accent-tint: #edf0f7;
+  /* Type colours. Kept a touch warm so it reads as paper-white on black
+     rather than clinical blue-white. */
+  --color-fg: #f4f4f1;
+  --color-muted: #8b8b95;
+
+  /* Blue is actionable: links, focus rings, primary button, eyebrows.
+     Two steps, because a single mid blue cannot carry both fills and small
+     text on near-black without one of them failing contrast. */
+  --color-accent: #4d6fd1;
+  --color-accent-strong: #6b8ade;
+  --color-accent-bright: #9db4e3;
+  --color-accent-deep: #1c2547;
 
   /* Amber is incomplete, and nothing else */
-  --color-status-wip: #b4530c;
+  --color-status-wip: #e08a3c;
 
-  /* Type */
-  --font-display: var(--font-anybody), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-azeret), ui-monospace, monospace;
+  /* Type. Michroma for display, JetBrains Mono for everything else, so the
+     page reads mono-forward with the wide face reserved for headlines. */
+  --font-display: var(--font-michroma), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-jetbrains), ui-monospace, monospace;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
 @layer base {
@@ -28,24 +39,25 @@
   }
 
   body {
-    background-color: var(--color-paper);
-    color: var(--color-ink);
+    background-color: var(--color-bg);
+    color: var(--color-fg);
     font-family: var(--font-body);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-accent-bright);
     outline-offset: 2px;
   }
 }
 
 @layer utilities {
-  /* Anybody exposes a width axis. Kept off the default so headings read
-     as drafting lettering rather than stretched novelty type. */
+  /* Michroma ships a single weight and no width axis, so this cannot lean on
+     font-variation-settings. Weight is pinned to 400 so a stray font-bold
+     cannot make the browser synthesise a fake bold. */
   .type-display {
     font-family: var(--font-display);
-    font-variation-settings: "wdth" 88;
-    letter-spacing: -0.02em;
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
   .type-eyebrow {
@@ -54,6 +66,120 @@
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+  }
+}
+
+/* Component styles live here rather than beside their components: these files
+   sit in src/components, which Next does not process for CSS imports. */
+
+/* CursorGrid ---------------------------------------------------------------- */
+/* pointer-events:none is load-bearing. Without it this fixed layer sits on top
+   of the whole page and swallows every click. */
+.cursor-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* GooeyNav ------------------------------------------------------------------ */
+/* Every rule is scoped under .gooey-nav. The upstream source styles bare `li`
+   and `button`, which would otherwise paint a white pill behind the skills
+   chips and any other list on the page. */
+.gooey-nav__list {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  filter: url("#gooey-nav-filter");
+}
+
+.gooey-nav__item {
+  position: relative;
+  isolation: isolate;
+}
+
+.gooey-nav__item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 9999px;
+  background-color: var(--color-fg);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 250ms ease,
+    transform 250ms ease;
+  pointer-events: none;
+}
+
+.gooey-nav__item:hover::after,
+.gooey-nav__item:focus-within::after,
+.gooey-nav__item[data-active="true"]::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.gooey-nav__link {
+  position: relative;
+  z-index: 1;
+  display: block;
+  border-radius: 9999px;
+  padding: 0.5rem 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+  transition: color 250ms ease;
+}
+
+.gooey-nav__link:hover,
+.gooey-nav__item:focus-within .gooey-nav__link,
+.gooey-nav__item[data-active="true"] .gooey-nav__link {
+  color: var(--color-bg);
+}
+
+/* The filter edge softens the focus ring, so it gets its own unfiltered
+   outline to stay visible against the goo. */
+.gooey-nav__link:focus-visible {
+  outline: 2px solid var(--color-accent-bright);
+  outline-offset: 3px;
+}
+
+/* Below `sm` the goo is traded for an outlined active state. Dropping the filter
+   also matters for legibility: the white pill and the dark-on-pill label both
+   assume the goo is present, and without it the label would be dark text on a
+   dark page. Four labels at this size stay inside 320px. */
+@media (max-width: 639px) {
+  .gooey-nav__list {
+    gap: 0.125rem;
+    filter: none;
+  }
+
+  .gooey-nav__item::after {
+    content: none;
+  }
+
+  .gooey-nav__link {
+    padding: 0.25rem 0.375rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    border: 1px solid transparent;
+  }
+
+  .gooey-nav__link:hover,
+  .gooey-nav__item:focus-within .gooey-nav__link {
+    color: var(--color-accent-bright);
+  }
+
+  .gooey-nav__item[data-active="true"] .gooey-nav__link {
+    color: var(--color-accent-bright);
+    border-color: var(--color-line);
   }
 }
 

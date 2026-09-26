@@ -10,11 +10,11 @@ import type { Project, ProjectStatus } from "@/lib/content/schema";
 const statusMeta: Record<ProjectStatus, { label: string; className: string }> = {
   live: {
     label: "Live",
-    className: "border-accent text-accent",
+    className: "border-accent text-accent-bright",
   },
   repo: {
     label: "Source only",
-    className: "border-accent text-accent",
+    className: "border-accent text-accent-bright",
   },
   private: {
     label: "Private repo",
@@ -28,17 +28,20 @@ const statusMeta: Record<ProjectStatus, { label: string; className: string }> = 
 
 export function ProjectCard({
   project,
+  index,
   priority = false,
 }: {
   project: Project;
+  /** Two-digit ordinal shown above the title, e.g. "01". */
+  index: string;
   /** Set on the first card, whose screenshot is the page's LCP element. */
   priority?: boolean;
 }) {
   const status = statusMeta[project.status];
 
   return (
-    <article className="group flex flex-col border border-line bg-paper transition-colors hover:border-accent">
-      <div className="relative aspect-16/10 overflow-hidden border-b border-line bg-accent-tint">
+    <article className="group flex flex-col border border-line bg-surface transition-colors hover:border-accent">
+      <div className="relative aspect-16/10 overflow-hidden border-b border-line bg-accent-deep">
         <Image
           src={project.screenshot.src}
           alt={project.screenshot.alt}
@@ -48,14 +51,15 @@ export function ProjectCard({
           className="object-cover"
         />
         <span
-          className={`absolute left-4 top-4 border bg-paper/90 px-2.5 py-1 font-mono text-[0.625rem] uppercase tracking-[0.12em] ${status.className}`}
+          className={`absolute left-4 top-4 border bg-surface-2/90 px-2.5 py-1 font-mono text-[0.625rem] uppercase tracking-[0.12em] ${status.className}`}
         >
           {status.label}
         </span>
       </div>
 
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="type-display text-xl font-bold text-ink">{project.title}</h3>
+        <span className="font-mono text-xs text-muted">{index}</span>
+        <h3 className="type-display mt-2 text-xl text-fg">{project.title}</h3>
         <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
           {project.hook}
         </p>
@@ -79,14 +83,14 @@ export function ProjectCard({
             <a
               key={link.href}
               href={link.href}
-              className="font-mono text-xs uppercase tracking-[0.12em] text-accent underline-offset-4 hover:underline"
+              className="font-mono text-xs uppercase tracking-[0.12em] text-accent-bright underline-offset-4 hover:underline"
             >
               {link.label}
             </a>
           ))}
           <Link
             href={`/projects/${project.slug}`}
-            className="ml-auto font-mono text-xs uppercase tracking-[0.12em] text-ink underline-offset-4 hover:text-accent hover:underline"
+            className="ml-auto font-mono text-xs uppercase tracking-[0.12em] text-fg underline-offset-4 hover:text-accent-bright hover:underline"
           >
             Case study
           </Link>

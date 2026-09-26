@@ -9,7 +9,7 @@ import { site } from "@/lib/content/site";
  */
 export function Contact() {
   return (
-    <Section id="contact" eyebrow="Contact" title="Get in touch">
+    <Section id="contact" index="03" eyebrow="Contact" title="Get in touch">
       <p className="mt-6 max-w-xl leading-relaxed text-muted">
         The contact form is the next piece of work. Until it lands, email is the
         fastest way to reach me.
@@ -18,7 +18,7 @@ export function Contact() {
       <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
         <a
           href={`mailto:${site.email}`}
-          className="font-mono text-sm text-accent underline-offset-4 hover:underline"
+          className="font-mono text-sm text-accent-bright underline-offset-4 hover:underline"
         >
           {site.email}
         </a>
@@ -26,7 +26,7 @@ export function Contact() {
           <a
             key={social.href}
             href={social.href}
-            className="font-mono text-xs uppercase tracking-[0.12em] text-muted underline-offset-4 hover:text-accent hover:underline"
+            className="font-mono text-xs uppercase tracking-[0.12em] text-muted underline-offset-4 hover:text-accent-bright hover:underline"
           >
             {social.label}
           </a>

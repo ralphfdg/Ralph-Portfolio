@@ -6,7 +6,7 @@ export function Projects() {
   const featured = getFeaturedProjects();
 
   return (
-    <Section id="work" eyebrow="Selected work" title="Projects">
+    <Section id="work" index="01" eyebrow="Selected work" title="Projects">
       {featured.length === 0 ? (
         <div className="mt-10 border border-dashed border-line p-10">
           <p className="max-w-md text-sm leading-relaxed text-muted">
@@ -15,7 +15,7 @@ export function Projects() {
           </p>
           <a
             href="#contact"
-            className="mt-5 inline-block font-mono text-xs uppercase tracking-[0.12em] text-accent underline-offset-4 hover:underline"
+            className="mt-5 inline-block font-mono text-xs uppercase tracking-[0.12em] text-accent-bright underline-offset-4 hover:underline"
           >
             Get in touch instead
           </a>
@@ -26,6 +26,7 @@ export function Projects() {
             <ProjectCard
               key={project.slug}
               project={project}
+              index={String(index + 1).padStart(2, "0")}
               priority={index === 0}
             />
           ))}

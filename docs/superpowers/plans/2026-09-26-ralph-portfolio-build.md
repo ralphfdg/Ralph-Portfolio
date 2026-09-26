@@ -1,5 +1,23 @@
 # Ralph Portfolio Build Plan
 
+> **Superseded in part — read this first.** This document is the original execution
+> plan and is kept as the record of how the page was first built. Its motion
+> sections no longer describe the shipped hero. What actually ships:
+>
+> - **Hero motion is GSAP, not Anime.js.** `animejs` was removed and
+>   `hero-motion.tsx` deleted. The hero background is `src/components/dot-grid.tsx`,
+>   a React Bits `DotGrid` adapted for this codebase, using `gsap@^3.15` and
+>   `gsap/InertiaPlugin`. See the Motion section of the spec for the prop values and
+>   the four deliberate departures from upstream.
+> - **`src/components/shape-waves.tsx` and its CSS have been deleted** as dead
+>   source. The `vgpu` dependency is deliberately **retained** and is now unused —
+>   it ships no bundle, since nothing imports it.
+> - The design system of record is the redesign addendum in the spec, not the token
+>   list in Task 1 below.
+>
+> Tasks 1–12 remain accurate for content, routing, and the projects grid. Task 5
+> ("Hero and motion") is superseded by the above.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans to implement this plan task-by-task.
 > Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -39,6 +57,13 @@ Resend, Vercel, Vitest.
 
 ## Design Tokens
 
+> **Superseded 2026-09-26** by the dark geometric redesign. The paper tokens below
+> are retained for history only; the values now in `globals.css` are the dark set.
+> See the spec's redesign addendum for the full rationale.
+
+<details>
+<summary>Original paper tokens (no longer in use)</summary>
+
 ```css
 --color-paper:         #F6F6F3;
 --color-ink:           #0B0B0C;
@@ -52,6 +77,27 @@ Resend, Vercel, Vitest.
 
 Type: Anybody display (width axis held below maximum) · Satoshi body · Azeret Mono for
 stack chips, section eyebrows, and metadata.
+
+</details>
+
+Current dark set:
+
+```css
+--color-bg:            #08080A;
+--color-surface:       #101014;
+--color-surface-2:     #17171C;
+--color-line:          #26262E;
+--color-line-soft:     #1A1A20;
+--color-fg:            #F4F4F1;
+--color-muted:         #8B8B95;
+--color-accent:        #4D6FD1;
+--color-accent-strong: #6B8ADE;
+--color-accent-bright: #9DB4E3;  /* accent text on dark */
+--color-accent-deep:   #1C2547;  /* image wells */
+--color-status-wip:    #E08A3C;
+```
+
+Type: Michroma display (**400 only — no `font-bold`**) · JetBrains Mono body and mono.
 
 ---
 
