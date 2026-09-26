@@ -16,6 +16,13 @@ const useIsomorphicLayoutEffect =
  * CSS apply a hidden state to `[data-reveal]` only once JavaScript is running.
  * Without that class the page is simply visible, so a reader without JavaScript
  * loses the animation and keeps the content.
+ *
+ * It also tracks which way the page is scrolling and publishes it as
+ * `data-scroll-dir` on the root, so a reveal can enter from the side the reader
+ * is travelling towards. Direction is a live attribute rather than something
+ * copied onto each element at reveal time: an element that has already revealed
+ * sits at `transform: none` and does not care, and one still waiting is at
+ * `opacity: 0` where its transform is invisible anyway.
  */
 export function Reveal() {
   useIsomorphicLayoutEffect(() => {
@@ -29,6 +36,28 @@ export function Reveal() {
     if (targets.length === 0) return;
 
     root.classList.add("js-reveal-ready");
+
+    /* Direction, not magnitude. Only the sign of the delta is ever used, so the
+       listener reads no layout and writes to the DOM only when the sign actually
+       flips: a handful of times per page instead of once per scroll event. */
+    let lastY = window.scrollY;
+    const setDirection = (dir: "up" | "down") => {
+      if (root.dataset.scrollDir !== dir) root.dataset.scrollDir = dir;
+    };
+    setDirection("down");
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      /* Sub-pixel deltas arrive from momentum scrolling and programmatic smooth
+         scrolls. Reacting to them makes the direction flicker, and an element
+         that happens to cross the threshold mid-flicker enters from the wrong
+         side. */
+      if (Math.abs(y - lastY) < 4) return;
+      setDirection(y > lastY ? "down" : "up");
+      lastY = y;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -44,8 +73,10 @@ export function Reveal() {
     for (const target of targets) observer.observe(target);
 
     return () => {
+      window.removeEventListener("scroll", onScroll);
       observer.disconnect();
       root.classList.remove("js-reveal-ready");
+      delete root.dataset.scrollDir;
     };
   }, []);
 
