@@ -138,7 +138,7 @@ Contact renumbers to `"04"`.
 ```ts
 export const aboutSchema = z.object({
   heading: z.string().min(1),
-  paragraphs: z.array(z.string().min(1)).min(1).max(400),
+  paragraphs: z.array(z.string().min(1).max(400)).min(1),
   interests: z.array(z.string().min(1)).default([]),
 });
 ```
@@ -146,10 +146,16 @@ export const aboutSchema = z.object({
 `paragraphs` stays an array even though the copy is one paragraph, so the copy
 can be split later without a schema or type change.
 
-The `.max(400)` cap is measured, not guessed. The approved copy is **360
-characters / 68 words / ~6 lines** at `max-w-2xl`. The cap exists to stop this
-becoming a wall of text, and it is in the schema rather than in a test so the
-guarantee is enforced at parse time.
+The `.max(400)` cap is per **string**, not on the array. Written as
+`z.array(z.string().min(1)).min(1).max(400)` it parses, passes every gate, and
+silently caps the *number of paragraphs* at 400 instead — which is how the first
+version of this schema shipped in the plan. The test that catches it is "rejects
+a paragraph over the length cap".
+
+The cap is measured, not guessed. The approved copy is **360 characters / 68
+words / ~6 lines** at `max-w-2xl`. It exists to stop this becoming a wall of
+text, and it is in the schema rather than only in a test so the guarantee is
+enforced at parse time.
 
 Note the earlier draft of this spec said `.min(2).max(320)`. Both bounds were
 wrong for the copy that was actually approved — a single paragraph fails
