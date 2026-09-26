@@ -126,6 +126,47 @@ describe("content schema", () => {
   });
 });
 
+describe("about copy", () => {
+  it("has at least one paragraph", () => {
+    expect(site.about.paragraphs.length).toBeGreaterThan(0);
+  });
+
+  it("keeps every paragraph inside the schema's length cap", () => {
+    // The cap exists to stop this becoming a wall of text. Asserting it here as
+    // well as in the schema means a raised cap has to be a deliberate edit in
+    // two places rather than a silent loosening.
+    for (const paragraph of site.about.paragraphs) {
+      expect(
+        paragraph.length,
+        `paragraph is ${paragraph.length} chars, over the 400 cap`,
+      ).toBeLessThanOrEqual(400);
+    }
+  });
+
+  it("has no blank paragraphs or interests", () => {
+    const blanks = [...site.about.paragraphs, ...site.about.interests].filter(
+      (value) => value.trim().length === 0,
+    );
+    expect(blanks).toEqual([]);
+  });
+
+  it("rejects an about block with no paragraphs", () => {
+    const result = siteSchema.safeParse({
+      ...site,
+      about: { ...site.about, paragraphs: [] },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a paragraph over the length cap", () => {
+    const result = siteSchema.safeParse({
+      ...site,
+      about: { ...site.about, paragraphs: ["x".repeat(401)] },
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe("project screenshot ratios", () => {
   it("gives every project an aspect", () => {
     const missing = projects.filter((p) => !p.screenshot.aspect);

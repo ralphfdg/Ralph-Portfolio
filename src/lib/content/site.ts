@@ -3,7 +3,7 @@ import type { SiteConfig } from "./schema";
 export const site: SiteConfig = {
   name: "Hello, i'm Ethan",
   title: "Software Engineer",
-  hook: "Honestly, I just love coding things it's basically magic, but with way more typing..",
+  hook: "Honestly, I just love coding things. It's basically magic, but with way more typing..",
 
   email: "ralphethan18@gmail.com",
 
@@ -64,4 +64,17 @@ export const site: SiteConfig = {
       items: ["Docker", "Git", "GitHub", "Postman", "Android Studio"],
     },
   ],
+
+  /**
+   * Drafted prose, and the author's to edit. It deliberately asserts no
+   * location, years of experience, employer or education: none of that was
+   * supplied, and inventing it would be fabrication rather than placeholder.
+   */
+  about: {
+    heading: "A bit about me",
+    paragraphs: [
+      "I'm Ethan, a software engineer who builds for the web. I like turning rough ideas into things you can actually click, and I care about the details in between — the type that lines up, the state that behaves. Away from the editor you'll find me on a basketball court or out for a run, usually still turning over whatever problem I was stuck on the night before.",
+    ],
+    interests: ["Basketball", "Running", "Coding"],
+  },
 };

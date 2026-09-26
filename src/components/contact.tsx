@@ -2,7 +2,6 @@ import Image from "next/image";
 
 import { DotGrid } from "./dot-grid";
 import { Section } from "./section";
-import SoftAurora from "./soft-aurora";
 import { site } from "@/lib/content/site";
 
 /**
@@ -17,17 +16,17 @@ import { site } from "@/lib/content/site";
  * full-bleed to the left edge, which put this section on a different grid from
  * the two above it.
  *
- * This is also where the hero's ambience lives now. The hero is a single
- * shader, and stacking a dot lattice, an aurora band and three drifting blobs
- * on top of it was the most expensive thing on the page. Down here the same
- * layers sit on a flat background, where they read as the closing flourish
- * they were always meant to be.
+ * The dot lattice and the gradient blobs live here rather than in the hero,
+ * which is a single shader: stacking a lattice, a band and three drifting blobs
+ * on top of it was the most expensive thing on the page. The aurora band that
+ * used to sit here has moved to the About section, so this backdrop is now two
+ * layers rather than three.
  */
 export function Contact() {
   return (
     <Section
       id="contact"
-      index="03"
+      index="04"
       eyebrow="Contact me"
       title="Let's make magic together!"
       lede="Tell me what you are building and I will work my magic! Email is the fastest way to reach me."
@@ -51,13 +50,6 @@ export function Contact() {
             activeColor="#9DB4E3"
             proximity={140}
           />
-
-          {/* `SoftAurora` is `h-full w-full`, so it needs a sized parent; the
-              band's mask fades the canvas rectangle out at the top edge, which
-              is what stops it showing as a hard horizontal line. */}
-          <div className="aurora-band">
-            <SoftAurora color1="#9db4e3" color2="#4d6fd1" />
-          </div>
         </>
       }
     >
@@ -94,7 +86,7 @@ export function Contact() {
               room for 24px. */}
           <a
             href={`mailto:${site.email}`}
-            className="type-display break-all text-lg text-fg underline-offset-[6px] transition-colors hover:text-accent-bright hover:underline md:text-2xl"
+            className="type-display break-all text-lg text-fg underline-offset-[6px] transition-colors hover:text-ember-bright hover:underline md:text-2xl"
           >
             {site.email}
           </a>
@@ -102,13 +94,17 @@ export function Contact() {
           {/* `max-w-md` because the portrait column is fixed, which leaves the
               actions roughly 1080px to fill at 1440. Left uncapped the three
               tiles spread to a third of the screen each and stop reading as a
-              set; `mx-auto` pulls the capped row back to the centre. */}
+              set; `mx-auto` pulls the capped row back to the centre.
+
+              Filled rather than outlined: these are the last actionable things on
+              the page, and they were the least visible thing on it. Outlined
+              blue on a dark field measured 4.68:1 and read as background. */}
           <ul className="mx-auto grid w-full max-w-md gap-3 sm:grid-cols-3">
             {site.socials.map((social) => (
               <li key={social.href}>
                 <a
                   href={social.href}
-                  className="block border border-accent/40 px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-accent-bright transition-colors hover:border-accent-bright"
+                  className="block bg-ember px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-bg transition-colors hover:bg-ember-bright"
                 >
                   {social.label}
                 </a>
@@ -120,7 +116,7 @@ export function Contact() {
               <a
                 href={site.resume.href}
                 download={site.resume.filename}
-                className="block border border-accent/40 px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-accent-bright transition-colors hover:border-accent-bright"
+                className="block bg-ember px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-bg transition-colors hover:bg-ember-bright"
               >
                 Résumé
               </a>

@@ -27,8 +27,16 @@
   --color-accent-bright: #9db4e3;
   --color-accent-deep: #1c2547;
 
-  /* Amber is incomplete, and nothing else */
-  --color-status-wip: #e08a3c;
+  /* Amber is the action colour: hero and contact buttons, and the WIP chip.
+     Two steps for the same reason the blue ramp has two — `#e08a3c` clears
+     7.50:1 as a fill with background-coloured text, but the hero's secondary
+     button and the contact email hover sit on the moving Grainient and dot-grid
+     fields rather than on flat background, and a live field raises the effective
+     background luminance. `#f0a95e` at 10.05:1 buys that headroom.
+
+     Renamed from `status-wip`, which described one chip rather than a role. */
+  --color-ember: #e08a3c;
+  --color-ember-bright: #f0a95e;
 
   /* Type. Michroma for display, JetBrains Mono for everything else, so the
      page reads mono-forward with the wide face reserved for headlines. */
@@ -149,7 +157,8 @@
 /* Below `sm` the goo is traded for an outlined active state. Dropping the filter
    also matters for legibility: the white pill and the dark-on-pill label both
    assume the goo is present, and without it the label would be dark text on a
-   dark page. Four labels at this size stay inside 320px. */
+   dark page. Five labels measure 248px against 305px available at 320px, so
+   there is room — but only for a fifth label, not a sixth. */
 @media (max-width: 639px) {
   .gooey-nav__list {
     gap: 0.125rem;
@@ -348,14 +357,33 @@
 /* The band's top edge is masked so the canvas rectangle has no visible seam
    and the aurora appears to rise out of the page. `SoftAurora` fills its
    parent, so the height here is the band's. */
-.aurora-band {
-  position: absolute;
-  inset-x: 0;
-  bottom: 0;
-  height: 150px;
-  -webkit-mask-image: linear-gradient(to top, #000 58%, transparent 100%);
-  mask-image: linear-gradient(to top, #000 58%, transparent 100%);
-}
+      .aurora-band {
+        position: absolute;
+        /* `inset-inline`, not `inset-x`. `inset-x` is a Tailwind *utility class*
+           name and is not a property here, so the browser drops the declaration
+           and the band collapses to its canvas's 300px intrinsic width. */
+        inset-inline: 0;
+        bottom: 0;
+        height: 150px;
+        /* Feathers at both ends. This band used to sit at the foot of the contact
+           section, where a top-only fade was enough because nothing was below
+           it. It now sits in a gap between a heading and a paragraph, and a hard
+           edge against either one reads as a seam. */
+        -webkit-mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          #000 30%,
+          #000 70%,
+          transparent 100%
+        );
+        mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          #000 30%,
+          #000 70%,
+          transparent 100%
+        );
+      }
 
 /* Screenshot frames --------------------------------------------------------- */
 /* The source screenshots run from 1.6 to 2.09, so a fixed ratio crops the wide

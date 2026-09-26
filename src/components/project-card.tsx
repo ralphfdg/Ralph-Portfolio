@@ -26,7 +26,7 @@ const statusMeta: Record<ProjectStatus, { label: string; className: string }> = 
   },
   wip: {
     label: "In development",
-    className: "border-status-wip text-status-wip",
+    className: "border-ember text-ember",
   },
 };
 

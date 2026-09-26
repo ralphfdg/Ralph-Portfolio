@@ -30,8 +30,15 @@ section wherever the two disagree.
 
 **Tokens.** `bg #08080a`, `surface #101014`, `surface-2 #17171c`, `line #26262e`,
 `fg #f4f4f1`, `muted #8b8b95`, `muted-bright #c2c4cd`, `accent #4d6fd1`,
-`accent-bright #9db4e3`, `accent-deep #1c2547`, `status-wip #e08a3c`. The
-`line-soft` token is currently unused and a candidate for removal.
+`accent-bright #9db4e3`, `accent-deep #1c2547`, `ember #e08a3c`,
+`ember-bright #f0a95e`. The `line-soft` token is currently unused and a
+candidate for removal.
+
+`status-wip #e08a3c` was **renamed** to `ember`, not duplicated — the hex was
+already identical, and the rename gives the colour a role rather than a single
+consumer. `ember` fills buttons, tiles and chips; `ember-bright` is the text and
+border step for use on live fields, plus the hover fill. See
+`2026-09-26-ralph-portfolio-about-section-design.md` § Ember actions.
 
 `muted-bright` was added later, in the Grainient pass. It exists for one job:
 **text that sits on a moving field** — the hero hook, and the contact eyebrow

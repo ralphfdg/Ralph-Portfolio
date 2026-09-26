@@ -43,19 +43,24 @@ export function Hero() {
           {site.hook}
         </p>
 
-        {/* The two pills are the only rounded shapes in the hero, kept as a
-            deliberate organic note against the shader's soft field. */}
+          {/* The two pills are the only rounded shapes in the hero, kept as a
+              deliberate organic note against the shader's soft field.
+
+              Amber rather than the brand blue: blue is this site's `actionable`
+              colour, so a blue button was the same colour as every link and
+              eyebrow around it and sank into the shader. The measured ratios are
+              in `globals.css`. */}
         <div className="rise-in rise-in-4 mt-10 flex flex-wrap items-center justify-center gap-4">
           <a
             href="#work"
-            className="rounded-full bg-accent px-6 py-3 font-mono text-xs uppercase tracking-[0.12em] text-bg transition-colors hover:bg-accent-strong"
+            className="rounded-full bg-ember px-6 py-3 font-mono text-xs uppercase tracking-[0.12em] text-bg transition-colors hover:bg-ember-bright"
           >
             View my work
           </a>
           <a
             href={site.resume.href}
             download={site.resume.filename}
-            className="rounded-full border border-line px-6 py-3 font-mono text-xs uppercase tracking-[0.12em] text-fg transition-colors hover:border-accent hover:text-accent-bright"
+            className="rounded-full border border-ember px-6 py-3 font-mono text-xs uppercase tracking-[0.12em] text-ember-bright transition-colors hover:border-ember-bright"
           >
             Download resume
           </a>

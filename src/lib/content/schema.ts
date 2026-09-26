@@ -92,6 +92,21 @@ export const socialLinkSchema = z.object({
   href: z.url(),
 });
 
+export const aboutSchema = z.object({
+  heading: z.string().min(1),
+  /**
+   * An array even though the approved copy is a single paragraph, so the copy
+   * can be split later without a schema or type change.
+   *
+   * The 400 cap is measured rather than guessed: the approved copy is 360
+   * characters. It lives in the schema rather than only in a test so the limit
+   * is enforced when the content is parsed.
+   */
+  paragraphs: z.array(z.string().min(1).max(400)).min(1),
+  /** Plain text, not links: a hobby is not a destination. */
+  interests: z.array(z.string().min(1)).default([]),
+});
+
 export const siteSchema = z.object({
   name: z.string().min(1),
   title: z.string().min(1),
@@ -107,6 +122,7 @@ export const siteSchema = z.object({
   }),
   socials: z.array(socialLinkSchema),
   skills: z.array(skillGroupSchema).min(1),
+  about: aboutSchema,
 });
 
 export type ProjectStatus = z.infer<typeof projectStatusSchema>;
@@ -115,4 +131,5 @@ export type Decision = z.infer<typeof decisionSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type SkillGroup = z.infer<typeof skillGroupSchema>;
 export type SocialLink = z.infer<typeof socialLinkSchema>;
+export type About = z.infer<typeof aboutSchema>;
 export type SiteConfig = z.infer<typeof siteSchema>;

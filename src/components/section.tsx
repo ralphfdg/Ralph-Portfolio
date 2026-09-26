@@ -5,6 +5,7 @@ export function Section({
   title,
   lede,
   backdrop,
+  midSlot,
   onField = false,
   children,
 }: {
@@ -28,6 +29,16 @@ export function Section({
    * anything nested inside it.
    */
   backdrop?: React.ReactNode;
+  /**
+   * A decorative layer rendered in the gap between the header and the body, in a
+   * full-width spacer. Unlike `backdrop` it is *not* clipped to the section and
+   * is positioned in normal flow, so a layer placed here can run to the
+   * section's edges. `About` uses it for the soft aurora band.
+   *
+   * The spacer is `aria-hidden` and the caller is responsible for making its
+   * contents pointer-transparent; nothing decorative should be reachable.
+   */
+  midSlot?: React.ReactNode;
   /**
    * Set when `backdrop` is a moving field rather than a static wash. It moves
    * the eyebrow and the lede up to `--color-muted-bright`, because
@@ -59,9 +70,19 @@ export function Section({
         </div>
       ) : null}
 
-      {/* `relative` on the content wrapper is what keeps the copy above the
-          backdrop. Both are positioned, so they land in the same paint layer and
-          DOM order decides — the wrapper comes second, so the copy wins. */}
+      {/* Two reading columns rather than one wrapper around everything. The gap
+          between them is a full-width spacer, which is the only arrangement that
+          satisfies both of `midSlot`'s requirements at once: the layer has to
+          sit *between* the header and the body, and it has to be full-bleed. A
+          layer placed inside a single reading column can only ever be 976px, and
+          forcing it wider from in there needs negative insets plus
+          `overflow-x: clip` on the section.
+
+          The spacer being a direct child of `<section>` is what makes `w-full`
+          mean the section's full width, and it is also the body's top margin, so
+          the children need none of their own. Both columns are `relative` for
+          the same reason the single wrapper was: they have to sit above the
+          backdrop in the paint order. */}
       <div className="relative mx-auto w-full max-w-5xl px-6">
         <div className="flex items-baseline gap-4 border-b border-line pb-4">
           <span className="font-mono text-xs text-accent-bright">{index}</span>
@@ -80,9 +101,15 @@ export function Section({
             {lede}
           </p>
         ) : null}
-
-        {children}
       </div>
+
+      {midSlot ? (
+        <div aria-hidden className="relative h-[120px] w-full">
+          {midSlot}
+        </div>
+      ) : null}
+
+      <div className="relative mx-auto w-full max-w-5xl px-6">{children}</div>
     </section>
   );
 }
