@@ -1,9 +1,9 @@
 import type { SiteConfig } from "./schema";
 
 export const site: SiteConfig = {
-  name: "Ethan",
+  name: "Hello, i'm Ethan",
   title: "Software Engineer",
-  hook: "Full-stack engineer building Laravel, TypeScript, and AWS systems, from AI-assisted clinical tooling to property management.",
+  hook: "Honestly, I just love coding things it's basically magic, but with way more typing..",
 
   email: "ralphethan18@gmail.com",
 
@@ -36,7 +36,6 @@ export const site: SiteConfig = {
         "Java",
         "C#",
         "PHP",
-        "SQL",
         "HTML5",
         "CSS3",
       ],
@@ -57,11 +56,6 @@ export const site: SiteConfig = {
       id: "backend",
       label: "Backend & Databases",
       items: ["Node.js", "MySQL", "PostgreSQL", "SQLite"],
-    },
-    {
-      id: "cloud",
-      label: "Cloud & Platforms",
-      items: ["AWS", "Azure Services"],
     },
     {
       id: "tools",

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { projectSchema, projectsSchema, siteSchema } from "./schema";
 import { projects } from "./projects";
+import { skillMarks } from "./skill-marks";
 import { site } from "./site";
 
 const validProject = {
@@ -112,5 +113,54 @@ describe("content schema", () => {
       screenshot: { src: "/projects/example.png", alt: "" },
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("skill marks", () => {
+  const everySkill = site.skills.flatMap((group) => group.items);
+
+  it("has an explicit mark for every authored skill", () => {
+    const missing = everySkill.filter(
+      (skill) => !(skill in skillMarks),
+    );
+    expect(missing, `no mark authored for: ${missing.join(", ")}`).toEqual([]);
+  });
+
+  it("has no marks for skills that were removed", () => {
+    const authored = new Set(everySkill);
+    const orphaned = Object.keys(skillMarks).filter(
+      (skill) => !authored.has(skill),
+    );
+    expect(orphaned, `marks for unknown skills: ${orphaned.join(", ")}`).toEqual(
+      [],
+    );
+  });
+
+  it("keeps the approved 23-skill set", () => {
+    expect(
+      everySkill,
+      `expected 23 skills, got ${everySkill.length}`,
+    ).toHaveLength(23);
+  });
+
+  it("has dropped the skills that have no brand mark", () => {
+    const removed = ["SQL", "Azure Services"].filter((skill) =>
+      everySkill.includes(skill),
+    );
+    expect(removed, `removed skills are back: ${removed.join(", ")}`).toEqual([]);
+  });
+
+  it("has no skill group left empty", () => {
+    const empty = site.skills
+      .filter((group) => group.items.length === 0)
+      .map((group) => group.id);
+    expect(empty, `empty groups: ${empty.join(", ")}`).toEqual([]);
+  });
+
+  it("gives every logo mark a non-empty alt", () => {
+    const badAlt = Object.entries(skillMarks)
+      .filter(([, mark]) => mark.kind === "logo" && !mark.alt)
+      .map(([skill]) => skill);
+    expect(badAlt, `logo marks missing alt: ${badAlt.join(", ")}`).toEqual([]);
   });
 });
