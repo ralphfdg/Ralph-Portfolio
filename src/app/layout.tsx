@@ -3,6 +3,7 @@ import { JetBrains_Mono, Michroma } from "next/font/google";
 import "./globals.css";
 
 import { Footer } from "@/components/footer";
+import { GradualBlur } from "@/components/gradual-blur";
 import { Nav } from "@/components/nav";
 
 const michroma = Michroma({
@@ -37,6 +38,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+        {/* Sits above the page and below the nav's own `z-50` background. The
+            order matters: painted under the header, it would only ever blur the
+            header's flat fill and nothing else. */}
+        <GradualBlur height="5rem" strength={8} divCount={6} zIndex={40} />
         <Nav />
         <main id="main" className="flex-1">
           {children}

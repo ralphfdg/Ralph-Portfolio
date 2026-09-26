@@ -323,6 +323,32 @@
   mask-image: linear-gradient(to top, #000 58%, transparent 100%);
 }
 
+/* Graduated backdrop blur --------------------------------------------------- */
+/* One `backdrop-filter` per stacked layer. The per-layer mask bands and the
+   per-layer `--blur-intensity` both come from inline styles, so the falloff
+   follows `divCount`; the stylesheet only supplies the filter itself. */
+.gradual-blur {
+  /* Fixed, not absolute: the only consumer is a `sticky` nav, and an absolute
+     overlay would scroll out from under it on the first wheel tick. */
+  position: fixed;
+  left: 0;
+  right: 0;
+  /* No `overflow: hidden`. A nav-height element is far shorter than a useful
+     blur height, and clipping would cut the fade off at the header's edge. */
+  pointer-events: none;
+}
+
+.gradual-blur > div {
+  position: absolute;
+  inset: 0;
+  /* Standard property only. Lightning CSS owns prefixing here: writing
+     `-webkit-backdrop-filter` alongside it makes the transformer treat the
+     prefixed line as authoritative and drop the standard one, which leaves
+     Chromium with an unsupported property and a computed value of `none`.
+     The `* 1px` is required because `--blur-intensity` is unitless. */
+  backdrop-filter: blur(calc(var(--blur-intensity) * 1px));
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
