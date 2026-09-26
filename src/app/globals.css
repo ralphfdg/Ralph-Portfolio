@@ -215,6 +215,114 @@
 .rise-in-3 { animation-delay: 240ms; }
 .rise-in-4 { animation-delay: 330ms; }
 
+/* Hero atmosphere ---------------------------------------------------------- */
+/* A static brand-blue wash. `accent-deep` at the top, falling to the page
+   background. */
+.hero-gradient {
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      var(--color-accent-deep) 0%,
+      transparent 62%
+    ),
+    linear-gradient(180deg, #0b0b0f 0%, var(--color-bg) 72%);
+}
+
+/* Three soft blobs drifting on offset cycles. Soft radial-gradient stops rather
+   than blurred elements: a large animated `filter: blur()` makes the compositor
+   re-rasterise a full-screen layer every frame, while a gradient gives the same
+   soft edge for free. Durations are coprime-ish so the composition does not
+   visibly loop. */
+.hero-glows {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-glow {
+  position: absolute;
+  border-radius: 9999px;
+  will-change: transform;
+}
+
+.hero-glow--a {
+  width: 44rem;
+  height: 44rem;
+  left: -12rem;
+  top: -16rem;
+  background: radial-gradient(
+    circle,
+    rgb(157 180 227 / 0.26) 0%,
+    transparent 66%
+  );
+  animation: glow-drift-a 11s ease-in-out infinite;
+}
+
+.hero-glow--b {
+  width: 38rem;
+  height: 38rem;
+  right: -12rem;
+  top: 0;
+  background: radial-gradient(
+    circle,
+    rgb(77 111 209 / 0.3) 0%,
+    transparent 66%
+  );
+  animation: glow-drift-b 14s ease-in-out infinite;
+}
+
+.hero-glow--c {
+  width: 34rem;
+  height: 34rem;
+  left: 50%;
+  bottom: -12rem;
+  margin-left: -17rem;
+  background: radial-gradient(
+    circle,
+    rgb(107 138 222 / 0.24) 0%,
+    transparent 68%
+  );
+  animation: glow-drift-c 8s ease-in-out infinite;
+}
+
+@keyframes glow-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4rem, 3rem, 0) scale(1.08);
+  }
+}
+
+@keyframes glow-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(-3.5rem, 2.5rem, 0) scale(1);
+  }
+}
+
+@keyframes glow-drift-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2.5rem, -2.5rem, 0) scale(1.1);
+  }
+}
+
+/* The band's top edge is masked so the canvas rectangle has no visible seam
+   and the aurora appears to rise out of the page. */
+.hero-aurora {
+  -webkit-mask-image: linear-gradient(to top, #000 58%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 58%, transparent 100%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

@@ -1,20 +1,35 @@
 import { DotGrid } from "./dot-grid";
+import SoftAurora from "./soft-aurora";
 import { site } from "@/lib/content/site";
 
 export function Hero() {
   return (
-    <div id="top" className="relative overflow-hidden border-b border-line bg-bg">
-      {/* The lattice is decorative and sits behind the copy, so the hero text
-          stays real DOM text: selectable, and readable without canvas support.
-          The hero paints its own opaque background, so nothing behind the page
-          can show through it. */}
-      <DotGrid
-        dotSize={3}
-        gap={24}
-        baseColor="#2A3350"
-        activeColor="#9DB4E3"
-        proximity={120}
-      />
+    <div id="top" className="relative overflow-hidden bg-bg">
+      {/* Every decorative layer sits in one absolutely positioned wrapper, so
+          the copy below is unambiguously above all of them and cannot be
+          overlapped by a canvas that happens to be taller than expected. The
+          lattice is decorative and the hero text stays real DOM text:
+          selectable, and readable without canvas support. */}
+      <div aria-hidden className="absolute inset-0">
+        <div className="hero-gradient absolute inset-0" />
+        <div className="hero-glows">
+          <span className="hero-glow hero-glow--a" />
+          <span className="hero-glow hero-glow--b" />
+          <span className="hero-glow hero-glow--c" />
+        </div>
+        <DotGrid
+          dotSize={3}
+          gap={24}
+          baseColor="#2A3350"
+          activeColor="#9DB4E3"
+          proximity={120}
+        />
+        {/* Replaces the hero's old border-b. Masked at the top edge so the
+            canvas box has no seam. */}
+        <div className="hero-aurora absolute inset-x-0 bottom-0 h-[150px]">
+          <SoftAurora color1="#9db4e3" color2="#4d6fd1" />
+        </div>
+      </div>
 
       <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-6 py-28 text-center md:py-36">
         <p className="type-eyebrow rise-in rise-in-1 text-accent-bright">
