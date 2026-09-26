@@ -10,6 +10,7 @@ export default function Home() {
     <>
       <Reveal />
       <Hero />
+      <About />
       {/* Work and Skills share one static wash between them rather than each
           carrying its own animated blobs. It is the same decoration appearing
           twice, and this page already runs a shader in the hero, one band in
@@ -18,15 +19,14 @@ export default function Home() {
           above and below it are too, so this wrapper is what keeps the wash
           from stretching to the page.
 
-          The wash stops here on purpose. About has its own animated band, and
-          stacking a static gradient under a moving one in the same section is
-          two effects competing rather than one composing. */}
+          The wash stops before Contact on purpose. About has its own animated
+          band, and stacking a static gradient under a moving one in the same
+          section is two effects competing rather than one composing. */}
       <div className="relative">
         <div aria-hidden className="section-wash" />
         <Projects />
         <Skills />
       </div>
-      <About />
       <Contact />
     </>
   );

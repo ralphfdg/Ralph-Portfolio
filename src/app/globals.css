@@ -157,9 +157,8 @@
 /* Below `sm` the goo is traded for an outlined active state. Dropping the filter
    also matters for legibility: the white pill and the dark-on-pill label both
    assume the goo is present, and without it the label would be dark text on a
-   dark page. Five labels stay inside 320px at this size, but only just — the
-   measured width is ~257px against 272px available, so this is verified rather
-   than assumed. Widening the labels or the padding here will overflow. */
+   dark page. Five labels measure 248px against 305px available at 320px, so
+   there is room — but only for a fifth label, not a sixth. */
 @media (max-width: 639px) {
   .gooey-nav__list {
     gap: 0.125rem;

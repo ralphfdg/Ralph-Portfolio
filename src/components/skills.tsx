@@ -21,7 +21,7 @@ export function Skills() {
   return (
     <Section
       id="skills"
-      index="02"
+      index="03"
       eyebrow="Technical skills"
       title="My skills"
       lede="The tools and programming languages I know."

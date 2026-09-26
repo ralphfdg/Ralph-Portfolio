@@ -8,7 +8,7 @@ export function Projects() {
   return (
     <Section
       id="work"
-      index="01"
+      index="02"
       eyebrow="Selected work"
       title="My work"
       lede="Here are some of my projects."

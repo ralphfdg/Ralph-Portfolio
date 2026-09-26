@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 // target and the pill highlights it whenever the hero is the section in view.
 const links = [
   { href: "#top", label: "Home" },
+  { href: "#about", label: "About" },
   { href: "#work", label: "Work" },
   { href: "#skills", label: "Skills" },
-  { href: "#about", label: "About" },
   { href: "#contact", label: "Contact" },
 ];
 

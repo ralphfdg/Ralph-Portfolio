@@ -19,19 +19,31 @@ export function About() {
   return (
     <Section
       id="about"
-      index="03"
+      index="01"
       eyebrow="About me"
       title={site.about.heading}
       midSlot={
-        /* `brightness` is halved because this band sits in a content column
-           rather than at the foot of a section, so it has to stay quiet enough
-           to read as background behind real prose. It is the first thing to
-           raise if it looks faint in review. */
+        /* `brightness` is the shader's own multiplier, and the fragment shader
+           feeds `clamp(length(col))` into alpha — so at 0.5 this band rendered
+           at half opacity and read as a faint tint rather than an aurora. It is
+           at the component default of 1.0 now.
+
+           The mask is what protects the copy, not the brightness: it feathers
+           the band's outer 30% at each end, and the spacer is the gap between
+           the heading and the body, so the bright core sits in empty space with
+           the two blocks of text outside the falloff. That is why this can be
+           turned up without measuring contrast again for every step.
+
+           `bandHeight` is raised from the 0.5 default because the solid region
+           the mask leaves is only the middle 40% of the 120px spacer — 48px.
+           At 0.5 the band is 60px tall and is cropped at both ends by the very
+           mask meant to soften it. 0.7 fills what the mask actually reveals. */
         <div className="aurora-band">
           <SoftAurora
-            color1="#9db4e3"
-            color2="#4d6fd1"
-            brightness={0.5}
+            color1="#9ec4ff"
+            color2="#4169e1"
+            brightness={1.0}
+            bandHeight={0.7}
           />
         </div>
       }
