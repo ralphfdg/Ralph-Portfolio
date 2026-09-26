@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, Michroma } from "next/font/google";
 import "./globals.css";
 
-import { CursorGrid } from "@/components/cursor-grid";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 
@@ -38,9 +37,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <CursorGrid />
         <Nav />
-        <main id="main" className="relative z-10 flex-1">
+        <main id="main" className="flex-1">
           {children}
         </main>
         <Footer />
