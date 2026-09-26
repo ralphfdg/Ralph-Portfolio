@@ -3,7 +3,7 @@ import type { SiteConfig } from "./schema";
 export const site: SiteConfig = {
   name: "Hello, i'm Ethan",
   title: "Software Engineer",
-  hook: "Honestly, I just love coding things it's basically magic, but with way more typing..",
+  hook: "Honestly, I just love coding things. It's basically magic, but with way more typing..",
 
   email: "ralphethan18@gmail.com",
 
