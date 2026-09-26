@@ -19,7 +19,7 @@ export function Contact() {
       <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3" data-reveal>
         <a
           href={`mailto:${site.email}`}
-          className="font-mono text-sm text-accent-bright underline-offset-4 hover:underline"
+          className="font-mono text-sm text-accent-bright underline-offset-4 transition-colors hover:text-accent-strong hover:underline"
         >
           {site.email}
         </a>
@@ -27,7 +27,7 @@ export function Contact() {
           <a
             key={social.href}
             href={social.href}
-            className="font-mono text-xs uppercase tracking-[0.12em] text-muted underline-offset-4 hover:text-accent-bright hover:underline"
+            className="font-mono text-xs uppercase tracking-[0.12em] text-muted underline-offset-4 transition-colors hover:text-accent-bright hover:underline"
           >
             {social.label}
           </a>

@@ -191,6 +191,30 @@
   transform: none;
 }
 
+/* Hero entrance ------------------------------------------------------------ */
+/* Keyframes run from a hidden state to the natural one, so an animation that
+   never runs leaves the copy exactly where the layout put it. `both` holds the
+   `from` state through the stagger delay. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise-in {
+  animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rise-in-1 { animation-delay: 60ms; }
+.rise-in-2 { animation-delay: 150ms; }
+.rise-in-3 { animation-delay: 240ms; }
+.rise-in-4 { animation-delay: 330ms; }
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -201,6 +225,11 @@
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    /* The delay has to be zeroed too. A staggered entrance with
+       `animation-fill-mode: both` holds its `from` state through the delay, so
+       zeroing only the duration left the last hero element sitting at opacity 0
+       for its full delay. */
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
   }
 }
