@@ -323,6 +323,80 @@
   mask-image: linear-gradient(to top, #000 58%, transparent 100%);
 }
 
+/* Work / Skills ambience --------------------------------------------------- */
+/* The same palette and drift as the hero, so the colour reads as one continuous
+   system rather than a second, unrelated decoration. Only the placement moves:
+   two blobs hug opposite edges and one anchors the middle of the pair. */
+.work-glows {
+  position: absolute;
+  inset: 0;
+  /* Clipping lives here rather than on the page wrapper. Putting it on the
+     wrapper would make the two sections a scroll container, which breaks
+     `position: sticky` for anything inside them. */
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+.work-glow {
+  position: absolute;
+  border-radius: 9999px;
+  will-change: transform;
+}
+
+.work-glow--a {
+  width: 40rem;
+  height: 40rem;
+  left: -14rem;
+  top: 4%;
+  background: radial-gradient(
+    circle,
+    rgb(157 180 227 / 0.22) 0%,
+    transparent 66%
+  );
+  animation: glow-drift-a 13s ease-in-out infinite;
+}
+
+.work-glow--b {
+  width: 36rem;
+  height: 36rem;
+  right: -13rem;
+  top: 38%;
+  background: radial-gradient(
+    circle,
+    rgb(77 111 209 / 0.26) 0%,
+    transparent 66%
+  );
+  animation: glow-drift-b 16s ease-in-out infinite;
+}
+
+.work-glow--c {
+  width: 42rem;
+  height: 42rem;
+  left: 50%;
+  top: 72%;
+  margin-left: -21rem;
+  background: radial-gradient(
+    circle,
+    rgb(107 138 222 / 0.2) 0%,
+    transparent 68%
+  );
+  animation: glow-drift-c 11s ease-in-out infinite;
+}
+
 /* Graduated backdrop blur --------------------------------------------------- */
 /* One `backdrop-filter` per stacked layer. The per-layer mask bands and the
    per-layer `--blur-intensity` both come from inline styles, so the falloff

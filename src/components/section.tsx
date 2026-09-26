@@ -16,10 +16,14 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
+    /* `relative` is load-bearing, not decoration: the Work/Skills ambience is an
+       absolutely positioned sibling. Without a positioning context here, that
+       layer wins the paint order over the static section and its blobs tint the
+       copy instead of sitting behind it. */
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="scroll-mt-24 py-20 md:py-28"
+      className="relative scroll-mt-24 py-20 md:py-28"
     >
       <div className="mx-auto w-full max-w-5xl px-6">
         <div className="flex items-baseline gap-4 border-b border-line pb-4">
