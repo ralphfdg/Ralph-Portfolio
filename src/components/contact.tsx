@@ -94,7 +94,7 @@ export function Contact() {
               room for 24px. */}
           <a
             href={`mailto:${site.email}`}
-            className="type-display break-all text-lg text-fg underline-offset-[6px] transition-colors hover:text-accent-bright hover:underline md:text-2xl"
+            className="type-display break-all text-lg text-fg underline-offset-[6px] transition-colors hover:text-ember-bright hover:underline md:text-2xl"
           >
             {site.email}
           </a>
@@ -102,13 +102,17 @@ export function Contact() {
           {/* `max-w-md` because the portrait column is fixed, which leaves the
               actions roughly 1080px to fill at 1440. Left uncapped the three
               tiles spread to a third of the screen each and stop reading as a
-              set; `mx-auto` pulls the capped row back to the centre. */}
+              set; `mx-auto` pulls the capped row back to the centre.
+
+              Filled rather than outlined: these are the last actionable things on
+              the page, and they were the least visible thing on it. Outlined
+              blue on a dark field measured 4.68:1 and read as background. */}
           <ul className="mx-auto grid w-full max-w-md gap-3 sm:grid-cols-3">
             {site.socials.map((social) => (
               <li key={social.href}>
                 <a
                   href={social.href}
-                  className="block border border-accent/40 px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-accent-bright transition-colors hover:border-accent-bright"
+                  className="block bg-ember px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-bg transition-colors hover:bg-ember-bright"
                 >
                   {social.label}
                 </a>
@@ -120,7 +124,7 @@ export function Contact() {
               <a
                 href={site.resume.href}
                 download={site.resume.filename}
-                className="block border border-accent/40 px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-accent-bright transition-colors hover:border-accent-bright"
+                className="block bg-ember px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-bg transition-colors hover:bg-ember-bright"
               >
                 Résumé
               </a>
