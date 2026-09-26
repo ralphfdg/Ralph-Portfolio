@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Surfaces */
+  --color-paper: #f6f6f3;
+  --color-ink: #0b0b0c;
+  --color-line: #e2e1dc;
+  --color-muted: #6b6a66;
+
+  /* Blue is actionable: links, focus rings, primary button, eyebrows */
+  --color-accent: #425b9a;
+  --color-accent-strong: #33477d;
+  --color-accent-tint: #edf0f7;
+
+  /* Amber is incomplete, and nothing else */
+  --color-status-wip: #b4530c;
+
+  /* Type */
+  --font-display: var(--font-anybody), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-azeret), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Anybody exposes a width axis. Kept off the default so headings read
+     as drafting lettering rather than stretched novelty type. */
+  .type-display {
+    font-family: var(--font-display);
+    font-variation-settings: "wdth" 88;
+    letter-spacing: -0.02em;
+  }
+
+  .type-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
