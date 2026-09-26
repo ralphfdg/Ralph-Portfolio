@@ -52,11 +52,7 @@ export function Skills() {
           ))}
         </div>
 
-        <div
-          data-reveal
-          className="h-full"
-          style={{ "--reveal-delay": "120ms" } as React.CSSProperties}
-        >
+        <div data-reveal data-reveal-lag="0.45" className="h-full">
           <SkillSpiral items={spiralItems} />
         </div>
       </div>

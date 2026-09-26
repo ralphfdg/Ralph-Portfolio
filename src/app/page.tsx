@@ -14,8 +14,8 @@ export default function Home() {
           contact section instead of ending on a hard horizontal seam. The
           sections above and below are position-relative, so they stay above
           this layer on the paint order. */}
-      <div className="relative">
-        <div aria-hidden className="work-glows">
+      <div data-parallax-scope className="relative">
+        <div aria-hidden className="work-glows" data-parallax="12">
           <span className="work-glow work-glow--a" />
           <span className="work-glow work-glow--b" />
           <span className="work-glow work-glow--c" />

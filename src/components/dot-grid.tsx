@@ -105,7 +105,7 @@ function throttle<A extends unknown[]>(
  */
 export function DotGrid({
   className = "",
-  dotSize = 32,
+  dotSize = 24,
   gap = 16,
   baseColor = "#5227FF",
   activeColor = "#5227FF",

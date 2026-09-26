@@ -83,14 +83,14 @@ export function ProjectCard({
     const canHover = window.matchMedia("(hover: hover)");
     if (reduced.matches || !canHover.matches) return;
 
-    const image = card.querySelector<HTMLElement>("[data-reveal='image']");
-    const reveal = card.querySelectorAll<HTMLElement>("[data-reveal='item']");
+    const image = card.querySelector<HTMLElement>("[data-hover='image']");
+    const reveal = card.querySelectorAll<HTMLElement>("[data-hover='item']");
     if (!image || reveal.length === 0) return;
 
     let current: ReturnType<typeof animate>[] = [];
 
     const enter = () => {
-      utils.remove(card.querySelectorAll("[data-reveal]"));
+      utils.remove(card.querySelectorAll("[data-hover]"));
       current = [
         animate(image, {
           scale: 1.08,
@@ -110,7 +110,7 @@ export function ProjectCard({
     };
 
     const leave = () => {
-      utils.remove(card.querySelectorAll("[data-reveal]"));
+      utils.remove(card.querySelectorAll("[data-hover]"));
       current = [
         animate(image, {
           scale: 1,
@@ -138,7 +138,7 @@ export function ProjectCard({
       card.removeEventListener("pointerenter", onEnter);
       card.removeEventListener("pointerleave", onLeave);
       current.forEach((animation) => animation.revert());
-      utils.remove(card.querySelectorAll("[data-reveal]"));
+      utils.remove(card.querySelectorAll("[data-hover]"));
     };
   }, []);
 
@@ -149,17 +149,17 @@ export function ProjectCard({
         isFeature ? "md:col-span-2 md:flex-row" : ""
       }`}
     >
-      {/* The feature tile drops its fixed aspect from `md` up and takes half the
-          width instead, so the image fills the height the text column sets
-          rather than dictating it. A wide screenshot inside a full-width
-          16:10 box would be far taller than its box; laying the card out
-          sideways keeps the image close to its native ratio. */}
+      {/* The frame takes its ratio from the project via `.shot-frame`, so a
+          2.09 screenshot is not cropped down to 1.6. The feature tile drops the
+          ratio from `md` up and takes half the width instead, so the image fills
+          the height the text column sets rather than dictating it. */}
       <div
-        className={`relative overflow-hidden bg-accent-deep ${
+        className={`shot-frame relative overflow-hidden bg-accent-deep ${
           isFeature
-            ? "aspect-16/10 border-b border-line md:aspect-auto md:w-1/2 md:shrink-0 md:border-r md:border-b-0"
-            : "aspect-16/10 border-b border-line"
+            ? "shot-frame--feature border-b border-line md:w-1/2 md:shrink-0 md:border-r md:border-b-0"
+            : "border-b border-line"
         }`}
+        style={{ "--shot-aspect": project.screenshot.aspect } as React.CSSProperties}
       >
         <Image
           src={project.screenshot.src}
@@ -180,7 +180,7 @@ export function ProjectCard({
               : "(min-width: 768px) 25vw, 100vw"
           }
           className="object-cover"
-          data-reveal="image"
+          data-hover="image"
         />
         <span
           className={`absolute left-4 top-4 border bg-surface-2/90 px-2.5 py-1 font-mono text-[0.625rem] uppercase tracking-[0.12em] ${status.className}`}
@@ -190,18 +190,18 @@ export function ProjectCard({
       </div>
 
       <div className="flex flex-1 flex-col p-6">
-        <span className="font-mono text-xs text-muted" data-reveal="item">
+        <span className="font-mono text-xs text-muted" data-hover="item">
           {index}
         </span>
         <h3
           className="type-display mt-2 text-xl text-fg"
-          data-reveal="item"
+          data-hover="item"
         >
           {project.title}
         </h3>
         <p
           className="mt-2 flex-1 text-sm leading-relaxed text-muted"
-          data-reveal="item"
+          data-hover="item"
         >
           {project.hook}
         </p>
@@ -209,7 +209,7 @@ export function ProjectCard({
         <ul
           className="mt-5 flex flex-wrap gap-1.5"
           aria-label="Tech stack"
-          data-reveal="item"
+          data-hover="item"
         >
           {project.stack.map((item) => (
             <li

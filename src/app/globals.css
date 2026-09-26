@@ -174,36 +174,15 @@
 }
 
 /* Scroll reveals ------------------------------------------------------------ */
-/* The hidden state is gated on `.js-reveal-ready`, which only `Reveal` adds. So
-   a reader without JavaScript never gets a hidden element, and the content is
-   in the markup regardless.
-
-   The base transform is the "scrolling down" case, so an element is never left
-   untransformed in the window before `Reveal` publishes a direction. Travel is
-   a translate only: `data-reveal="image"` also matches the `fill` image inside
-   an `overflow-hidden` frame, where any scale would briefly expose the panel
-   behind it. */
-.js-reveal-ready [data-reveal] {
-  opacity: 0;
-  transform: translate3d(0, 40px, 0);
-  transition:
-    opacity 700ms ease,
-    transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: var(--reveal-delay, 0ms);
-}
-
-/* Scrolling up: content drops in from above instead, so the page reads as
-   connected to the direction of travel. */
-.js-reveal-ready[data-scroll-dir="up"] [data-reveal] {
-  transform: translate3d(0, -40px, 0);
-}
-
-/* Must stay after the direction rules. `.is-revealed` ties them on specificity
-   at 0-3-0, so source order is what actually hands it the transform. */
-.js-reveal-ready [data-reveal].is-revealed {
-  opacity: 1;
-  transform: none;
-}
+/* Intentionally empty of reveal state. `Reveal` drives every scroll-linked
+   animation through ScrollTrigger now, which writes opacity and transform
+   inline, and it does that inside a `prefers-reduced-motion: no-preference`
+   guard. There is deliberately no `.js-reveal-ready [data-reveal] { opacity: 0 }`
+   rule any more: a hidden state owned by CSS has to be undone by CSS, and the
+   thing undoing it is JavaScript. That arrangement leaves content invisible if
+   the script errors, if the media query does not match, or if the observer never
+   fires. With no hidden state in the stylesheet, all three failure modes just
+   render the page, which is the correct outcome for content. */
 
 /* Hero entrance ------------------------------------------------------------ */
 /* Keyframes run from a hidden state to the natural one, so an animation that
@@ -409,6 +388,25 @@
     transparent 68%
   );
   animation: glow-drift-c 11s ease-in-out infinite;
+}
+
+/* Screenshot frames --------------------------------------------------------- */
+/* The source screenshots run from 1.6 to 2.09, so a fixed ratio crops the wide
+   ones and letterboxes the rest. Each frame takes its ratio from the project
+   instead. The `16 / 10` fallback is the ratio the card used before this
+   existed, so a project with no `aspect` renders exactly as it used to. */
+.shot-frame {
+  aspect-ratio: var(--shot-aspect, 16 / 10);
+}
+
+/* The feature tile takes half the width from `md` up and lets the text column
+   set the height instead, so its ratio has to stop applying there. This has to
+   be a media query rather than a `md:aspect-auto` utility: the ratio arrives as
+   an inline custom property, and an inline value outranks any class. */
+@media (min-width: 768px) {
+  .shot-frame--feature {
+    aspect-ratio: auto;
+  }
 }
 
 /* Graduated backdrop blur --------------------------------------------------- */
