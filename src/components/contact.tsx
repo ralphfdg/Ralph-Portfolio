@@ -2,7 +2,6 @@ import Image from "next/image";
 
 import { DotGrid } from "./dot-grid";
 import { Section } from "./section";
-import SoftAurora from "./soft-aurora";
 import { site } from "@/lib/content/site";
 
 /**
@@ -17,17 +16,17 @@ import { site } from "@/lib/content/site";
  * full-bleed to the left edge, which put this section on a different grid from
  * the two above it.
  *
- * This is also where the hero's ambience lives now. The hero is a single
- * shader, and stacking a dot lattice, an aurora band and three drifting blobs
- * on top of it was the most expensive thing on the page. Down here the same
- * layers sit on a flat background, where they read as the closing flourish
- * they were always meant to be.
+ * The dot lattice and the gradient blobs live here rather than in the hero,
+ * which is a single shader: stacking a lattice, a band and three drifting blobs
+ * on top of it was the most expensive thing on the page. The aurora band that
+ * used to sit here has moved to the About section, so this backdrop is now two
+ * layers rather than three.
  */
 export function Contact() {
   return (
     <Section
       id="contact"
-      index="03"
+      index="04"
       eyebrow="Contact me"
       title="Let's make magic together!"
       lede="Tell me what you are building and I will work my magic! Email is the fastest way to reach me."
@@ -51,13 +50,6 @@ export function Contact() {
             activeColor="#9DB4E3"
             proximity={140}
           />
-
-          {/* `SoftAurora` is `h-full w-full`, so it needs a sized parent; the
-              band's mask fades the canvas rectangle out at the top edge, which
-              is what stops it showing as a hard horizontal line. */}
-          <div className="aurora-band">
-            <SoftAurora color1="#9db4e3" color2="#4d6fd1" />
-          </div>
         </>
       }
     >
