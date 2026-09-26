@@ -16,7 +16,7 @@ export function Contact() {
       title="Let's make magic together!"
       lede="Tell me what you are building and I will tell you honestly whether I can help. Email is the fastest way to reach me."
     >
-      <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3" data-reveal>
         <a
           href={`mailto:${site.email}`}
           className="font-mono text-sm text-accent-bright underline-offset-4 hover:underline"

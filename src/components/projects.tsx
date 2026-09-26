@@ -27,7 +27,7 @@ export function Projects() {
           </a>
         </div>
       ) : (
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
+        <div className="mt-12 grid gap-6 md:grid-cols-2" data-reveal>
           {featured.map((project, index) => (
             <ProjectCard
               key={project.slug}

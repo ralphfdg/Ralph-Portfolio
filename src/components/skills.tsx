@@ -32,7 +32,7 @@ export function Skills() {
           the default `items-stretch` so the spiral frame can match the height of
           the list beside it rather than carrying a height of its own. */}
       <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-12">
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8" data-reveal>
           {site.skills.map((group) => (
             <div key={group.id}>
               <h3 className="type-eyebrow border-b border-line pb-3 text-muted">
@@ -52,7 +52,13 @@ export function Skills() {
           ))}
         </div>
 
-        <SkillSpiral items={spiralItems} />
+        <div
+          data-reveal
+          className="h-full"
+          style={{ "--reveal-delay": "120ms" } as React.CSSProperties}
+        >
+          <SkillSpiral items={spiralItems} />
+        </div>
       </div>
     </Section>
   );
