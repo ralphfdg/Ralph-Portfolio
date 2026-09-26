@@ -3,6 +3,7 @@ export function Section({
   index,
   eyebrow,
   title,
+  lede,
   children,
 }: {
   id: string;
@@ -10,6 +11,8 @@ export function Section({
   index: string;
   eyebrow: string;
   title: string;
+  /** Optional supporting line, rendered under the title. */
+  lede?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -30,6 +33,10 @@ export function Section({
         >
           {title}
         </h2>
+
+        {lede ? (
+          <p className="mt-4 max-w-2xl leading-relaxed text-muted">{lede}</p>
+        ) : null}
 
         {children}
       </div>

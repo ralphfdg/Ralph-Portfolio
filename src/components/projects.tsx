@@ -6,12 +6,18 @@ export function Projects() {
   const featured = getFeaturedProjects();
 
   return (
-    <Section id="work" index="01" eyebrow="Selected work" title="Projects">
+    <Section
+      id="work"
+      index="01"
+      eyebrow="Selected work"
+      title="My work"
+      lede="Three builds, each one started because something about it annoyed me. Open any of them for the decisions behind the code, including the ones I would make differently."
+    >
       {featured.length === 0 ? (
         <div className="mt-10 border border-dashed border-line p-10">
           <p className="max-w-md text-sm leading-relaxed text-muted">
-            Case studies are being written. In the meantime, the stack below and the
-            contact form are the fastest way to see how I work.
+            Case studies are being written. In the meantime, the skills below and
+            the contact details are the fastest way to see how I work.
           </p>
           <a
             href="#contact"
@@ -28,6 +34,7 @@ export function Projects() {
               project={project}
               index={String(index + 1).padStart(2, "0")}
               priority={index === 0}
+              variant={index === 0 ? "feature" : "standard"}
             />
           ))}
         </div>

@@ -9,12 +9,13 @@ import { site } from "@/lib/content/site";
  */
 export function Contact() {
   return (
-    <Section id="contact" index="03" eyebrow="Contact" title="Get in touch">
-      <p className="mt-6 max-w-xl leading-relaxed text-muted">
-        The contact form is the next piece of work. Until it lands, email is the
-        fastest way to reach me.
-      </p>
-
+    <Section
+      id="contact"
+      index="03"
+      eyebrow="Contact me"
+      title="Let's make magic together!"
+      lede="Tell me what you are building and I will tell you honestly whether I can help. Email is the fastest way to reach me."
+    >
       <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
         <a
           href={`mailto:${site.email}`}
