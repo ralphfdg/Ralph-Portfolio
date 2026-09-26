@@ -356,14 +356,33 @@
 /* The band's top edge is masked so the canvas rectangle has no visible seam
    and the aurora appears to rise out of the page. `SoftAurora` fills its
    parent, so the height here is the band's. */
-.aurora-band {
-  position: absolute;
-  inset-x: 0;
-  bottom: 0;
-  height: 150px;
-  -webkit-mask-image: linear-gradient(to top, #000 58%, transparent 100%);
-  mask-image: linear-gradient(to top, #000 58%, transparent 100%);
-}
+      .aurora-band {
+        position: absolute;
+        /* `inset-inline`, not `inset-x`. `inset-x` is a Tailwind *utility class*
+           name and is not a property here, so the browser drops the declaration
+           and the band collapses to its canvas's 300px intrinsic width. */
+        inset-inline: 0;
+        bottom: 0;
+        height: 150px;
+        /* Feathers at both ends. This band used to sit at the foot of the contact
+           section, where a top-only fade was enough because nothing was below
+           it. It now sits in a gap between a heading and a paragraph, and a hard
+           edge against either one reads as a seam. */
+        -webkit-mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          #000 30%,
+          #000 70%,
+          transparent 100%
+        );
+        mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          #000 30%,
+          #000 70%,
+          transparent 100%
+        );
+      }
 
 /* Screenshot frames --------------------------------------------------------- */
 /* The source screenshots run from 1.6 to 2.09, so a fixed ratio crops the wide
