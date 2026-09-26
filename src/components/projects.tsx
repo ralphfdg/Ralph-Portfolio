@@ -11,7 +11,7 @@ export function Projects() {
       index="01"
       eyebrow="Selected work"
       title="My work"
-      lede="Three builds, each one started because something about it annoyed me. Open any of them for the decisions behind the code, including the ones I would make differently."
+      lede="Here are some of my projects."
     >
       {featured.length === 0 ? (
         <div className="mt-10 border border-dashed border-line p-10">

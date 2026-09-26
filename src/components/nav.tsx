@@ -3,7 +3,10 @@ import { site } from "@/lib/content/site";
 
 export function Nav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur-sm">
+    /* `backdrop-blur-sm` is gone: the GradualBlur in `layout.tsx` is anchored
+       to the same top edge and does a graduated version of this job. Keeping
+       both stacked two `backdrop-filter`s over the same pixels. */
+    <header className="sticky top-0 z-50 border-b border-line bg-bg/80">
       {/* One centred group rather than wordmark / nav / socials spread across a
           justify-between row: the bar reads as a single unit, and the sticky
           header can never wrap onto a second line as the labels grow. */}

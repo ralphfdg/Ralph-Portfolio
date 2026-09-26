@@ -176,16 +176,30 @@
 /* Scroll reveals ------------------------------------------------------------ */
 /* The hidden state is gated on `.js-reveal-ready`, which only `Reveal` adds. So
    a reader without JavaScript never gets a hidden element, and the content is
-   in the markup regardless. */
+   in the markup regardless.
+
+   The base transform is the "scrolling down" case, so an element is never left
+   untransformed in the window before `Reveal` publishes a direction. Travel is
+   a translate only: `data-reveal="image"` also matches the `fill` image inside
+   an `overflow-hidden` frame, where any scale would briefly expose the panel
+   behind it. */
 .js-reveal-ready [data-reveal] {
   opacity: 0;
-  transform: translate3d(0, 18px, 0);
+  transform: translate3d(0, 40px, 0);
   transition:
     opacity 700ms ease,
     transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--reveal-delay, 0ms);
 }
 
+/* Scrolling up: content drops in from above instead, so the page reads as
+   connected to the direction of travel. */
+.js-reveal-ready[data-scroll-dir="up"] [data-reveal] {
+  transform: translate3d(0, -40px, 0);
+}
+
+/* Must stay after the direction rules. `.is-revealed` ties them on specificity
+   at 0-3-0, so source order is what actually hands it the transform. */
 .js-reveal-ready [data-reveal].is-revealed {
   opacity: 1;
   transform: none;
@@ -321,6 +335,106 @@
 .hero-aurora {
   -webkit-mask-image: linear-gradient(to top, #000 58%, transparent 100%);
   mask-image: linear-gradient(to top, #000 58%, transparent 100%);
+}
+
+/* Work / Skills ambience --------------------------------------------------- */
+/* The same palette and drift as the hero, so the colour reads as one continuous
+   system rather than a second, unrelated decoration. Only the placement moves:
+   two blobs hug opposite edges and one anchors the middle of the pair. */
+.work-glows {
+  position: absolute;
+  inset: 0;
+  /* Clipping lives here rather than on the page wrapper. Putting it on the
+     wrapper would make the two sections a scroll container, which breaks
+     `position: sticky` for anything inside them. */
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+.work-glow {
+  position: absolute;
+  border-radius: 9999px;
+  will-change: transform;
+}
+
+.work-glow--a {
+  width: 40rem;
+  height: 40rem;
+  left: -14rem;
+  top: 4%;
+  background: radial-gradient(
+    circle,
+    rgb(157 180 227 / 0.22) 0%,
+    transparent 66%
+  );
+  animation: glow-drift-a 13s ease-in-out infinite;
+}
+
+.work-glow--b {
+  width: 36rem;
+  height: 36rem;
+  right: -13rem;
+  top: 38%;
+  background: radial-gradient(
+    circle,
+    rgb(77 111 209 / 0.26) 0%,
+    transparent 66%
+  );
+  animation: glow-drift-b 16s ease-in-out infinite;
+}
+
+.work-glow--c {
+  width: 42rem;
+  height: 42rem;
+  left: 50%;
+  top: 72%;
+  margin-left: -21rem;
+  background: radial-gradient(
+    circle,
+    rgb(107 138 222 / 0.2) 0%,
+    transparent 68%
+  );
+  animation: glow-drift-c 11s ease-in-out infinite;
+}
+
+/* Graduated backdrop blur --------------------------------------------------- */
+/* One `backdrop-filter` per stacked layer. The per-layer mask bands and the
+   per-layer `--blur-intensity` both come from inline styles, so the falloff
+   follows `divCount`; the stylesheet only supplies the filter itself. */
+.gradual-blur {
+  /* Fixed, not absolute: the only consumer is a `sticky` nav, and an absolute
+     overlay would scroll out from under it on the first wheel tick. */
+  position: fixed;
+  left: 0;
+  right: 0;
+  /* No `overflow: hidden`. A nav-height element is far shorter than a useful
+     blur height, and clipping would cut the fade off at the header's edge. */
+  pointer-events: none;
+}
+
+.gradual-blur > div {
+  position: absolute;
+  inset: 0;
+  /* Standard property only. Lightning CSS owns prefixing here: writing
+     `-webkit-backdrop-filter` alongside it makes the transformer treat the
+     prefixed line as authoritative and drop the standard one, which leaves
+     Chromium with an unsupported property and a computed value of `none`.
+     The `* 1px` is required because `--blur-intensity` is unitless. */
+  backdrop-filter: blur(calc(var(--blur-intensity) * 1px));
 }
 
 @media (prefers-reduced-motion: reduce) {
