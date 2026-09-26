@@ -27,8 +27,16 @@
   --color-accent-bright: #9db4e3;
   --color-accent-deep: #1c2547;
 
-  /* Amber is incomplete, and nothing else */
-  --color-status-wip: #e08a3c;
+  /* Amber is the action colour: hero and contact buttons, and the WIP chip.
+     Two steps for the same reason the blue ramp has two — `#e08a3c` clears
+     7.50:1 as a fill with background-coloured text, but the hero's secondary
+     button and the contact email hover sit on the moving Grainient and dot-grid
+     fields rather than on flat background, and a live field raises the effective
+     background luminance. `#f0a95e` at 10.05:1 buys that headroom.
+
+     Renamed from `status-wip`, which described one chip rather than a role. */
+  --color-ember: #e08a3c;
+  --color-ember-bright: #f0a95e;
 
   /* Type. Michroma for display, JetBrains Mono for everything else, so the
      page reads mono-forward with the wide face reserved for headlines. */
