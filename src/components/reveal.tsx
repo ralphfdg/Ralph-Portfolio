@@ -1,83 +1,103 @@
 "use client";
 
 import { useEffect, useLayoutEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 /**
  * `useLayoutEffect` warns on the server, where it never runs anyway. The client
- * branch is what matters: it applies the hidden state before the browser paints,
- * so a reveal never flashes its own starting position.
+ * branch is what matters: ScrollTrigger measures the document, so the triggers
+ * have to exist before the browser paints or a reveal flashes its own starting
+ * state.
  */
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**
- * One observer for every scroll reveal on the page. `Reveal` renders nothing; it
- * exists to add `js-reveal-ready` to the root element, which is what lets the
- * CSS apply a hidden state to `[data-reveal]` only once JavaScript is running.
- * Without that class the page is simply visible, so a reader without JavaScript
- * loses the animation and keeps the content.
+ * Where a reveal starts and ends, as a percentage of the viewport height
+ * measured down from the top. The window is deliberately narrow so the scrub has
+ * some travel to work with: an element stays hidden until its top reaches
+ * `START`, and is fully revealed by the time its top reaches `END`.
+ */
+const REVEAL_START = 88;
+const REVEAL_END = 55;
+
+/** How far a hidden element sits below its resting place, in pixels. */
+const REVEAL_RISE = 40;
+
+/**
+ * Drives the scroll-linked reveals for the section blocks.
  *
- * It also tracks which way the page is scrolling and publishes it as
- * `data-scroll-dir` on the root, so a reveal can enter from the side the reader
- * is travelling towards. Direction is a live attribute rather than something
- * copied onto each element at reveal time: an element that has already revealed
- * sits at `transform: none` and does not care, and one still waiting is at
- * `opacity: 0` where its transform is invisible anyway.
+ * Two decisions are load-bearing here.
+ *
+ * Everything scroll-driven lives inside one `matchMedia` context gated on
+ * `no-preference`. Under `reduce` the function never runs, so no inline opacity
+ * or transform is ever written and the content sits at its natural, visible
+ * state. Nothing in CSS hides `[data-reveal]` any more, which makes this the
+ * only thing between a reduced-motion reader and an invisible page — and it
+ * fails safe, because no JavaScript also means no hidden state.
+ *
+ * This used to drive scroll-scrubbed parallax on the decorative layers too,
+ * which needed the layer's wrapper to be a real ancestor to measure against and
+ * a `yPercent` on a child that already had a running CSS animation competing for
+ * the same transform. Both of those layers are gone: the hero is one shader
+ * that animates itself, and the section ambience is either a static gradient or
+ * inside the contact section's clipped backdrop. Nothing on the page
+ * translates on scroll any more, so the engine went with it.
+ *
+ * `data-reveal` belongs to this module alone. The project cards used to share the
+ * attribute for their hover animation, which put two libraries on the same
+ * `opacity` and `transform`; they own `data-hover` now.
  */
 export function Reveal() {
   useIsomorphicLayoutEffect(() => {
     const root = document.documentElement;
-    const targets = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-reveal]"),
-    );
 
-    // Nothing to observe. Leave the page alone rather than marking it ready and
-    // hiding content that will never be revealed.
-    if (targets.length === 0) return;
+    // Registered here rather than at module scope: the effect only ever runs on
+    // the client, so the plugin never has to be safe during SSR module eval.
+    gsap.registerPlugin(ScrollTrigger);
 
-    root.classList.add("js-reveal-ready");
+    const mm = gsap.matchMedia();
 
-    /* Direction, not magnitude. Only the sign of the delta is ever used, so the
-       listener reads no layout and writes to the DOM only when the sign actually
-       flips: a handful of times per page instead of once per scroll event. */
-    let lastY = window.scrollY;
-    const setDirection = (dir: "up" | "down") => {
-      if (root.dataset.scrollDir !== dir) root.dataset.scrollDir = dir;
-    };
-    setDirection("down");
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      for (const el of root.querySelectorAll<HTMLElement>("[data-reveal]")) {
+        /*
+         * A lag shifts the end of the window rather than delaying a tween.
+         * "120ms later" means nothing once progress is bound to scroll distance,
+         * so the stagger is re-expressed as distance: the spiral finishes its
+         * reveal further down the viewport than the list beside it, which is
+         * what the delay used to buy.
+         */
+        const lag = Number.parseFloat(el.dataset.revealLag ?? "0");
+        const end =
+          (Number.isFinite(lag) ? REVEAL_END + lag * (REVEAL_START - REVEAL_END) : REVEAL_END);
 
-    const onScroll = () => {
-      const y = window.scrollY;
-      /* Sub-pixel deltas arrive from momentum scrolling and programmatic smooth
-         scrolls. Reacting to them makes the direction flicker, and an element
-         that happens to cross the threshold mid-flicker enters from the wrong
-         side. */
-      if (Math.abs(y - lastY) < 4) return;
-      setDirection(y > lastY ? "down" : "up");
-      lastY = y;
-    };
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: REVEAL_RISE },
+          {
+            opacity: 1,
+            y: 0,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el,
+              start: `top ${REVEAL_START}%`,
+              end: `top ${end}%`,
+              scrub: true,
+            },
+          },
+        );
+      }
+    });
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    /*
+     * Webfonts land after first paint and change how tall everything below them
+     * is, which leaves every trigger measured against a layout that no longer
+     * exists. One refresh re-measures them against the real thing.
+     */
+    void document.fonts.ready.then(() => ScrollTrigger.refresh());
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          entry.target.classList.add("is-revealed");
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
-    );
-
-    for (const target of targets) observer.observe(target);
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      observer.disconnect();
-      root.classList.remove("js-reveal-ready");
-      delete root.dataset.scrollDir;
-    };
+    return () => mm.revert();
   }, []);
 
   return null;

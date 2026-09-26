@@ -1,6 +1,8 @@
 import Image from "next/image";
 
+import { DotGrid } from "./dot-grid";
 import { Section } from "./section";
+import SoftAurora from "./soft-aurora";
 import { site } from "@/lib/content/site";
 
 /**
@@ -8,6 +10,18 @@ import { site } from "@/lib/content/site";
  * `mailto:` rather than a form that cannot submit anything. It exists so the
  * nav's `#contact` anchor and the Work section's fallback link both resolve
  * to something real.
+ *
+ * Laid out as a centred block: the portrait and the actions form one centred
+ * unit inside the normal reading column, so the section closes the page on the
+ * same measure everything above it uses. The earlier version ran the portrait
+ * full-bleed to the left edge, which put this section on a different grid from
+ * the two above it.
+ *
+ * This is also where the hero's ambience lives now. The hero is a single
+ * shader, and stacking a dot lattice, an aurora band and three drifting blobs
+ * on top of it was the most expensive thing on the page. Down here the same
+ * layers sit on a flat background, where they read as the closing flourish
+ * they were always meant to be.
  */
 export function Contact() {
   return (
@@ -16,42 +30,102 @@ export function Contact() {
       index="03"
       eyebrow="Contact me"
       title="Let's make magic together!"
-      tone="brand"
       lede="Tell me what you are building and I will work my magic! Email is the fastest way to reach me."
+      onField
+      backdrop={
+        <>
+          <div className="contact-glows">
+            <span className="contact-blob contact-blob--a" />
+            <span className="contact-blob contact-blob--b" />
+            <span className="contact-blob contact-blob--c" />
+          </div>
+
+          {/* Above the blobs, not below: they are soft translucent gradients, so
+              anything underneath them loses contrast, and these dots brighten
+              on pointer proximity. `DotGrid` is already `absolute inset-0`, so
+              the backdrop wrapper is the box it measures against. */}
+          <DotGrid
+            dotSize={5}
+            gap={18}
+            baseColor="#2A3350"
+            activeColor="#9DB4E3"
+            proximity={140}
+          />
+
+          {/* `SoftAurora` is `h-full w-full`, so it needs a sized parent; the
+              band's mask fades the canvas rectangle out at the top edge, which
+              is what stops it showing as a hard horizontal line. */}
+          <div className="aurora-band">
+            <SoftAurora color1="#9db4e3" color2="#4d6fd1" />
+          </div>
+        </>
+      }
     >
       <div
-        className="mt-10 flex flex-col gap-8 sm:flex-row sm:items-center sm:gap-10"
+        className="mt-14 grid items-center gap-12 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)] md:gap-16"
         data-reveal
       >
-        {/* The parent carries the size because the image fills it; `fill` with
-            no intrinsic dimensions would collapse to zero. */}
-        <div className="relative h-64 w-64 shrink-0 overflow-hidden rounded-3xl border border-accent/40 sm:h-72 sm:w-72">
+        {/* `aspect-[6/7]` rather than the `min-h` this had before: the source
+            portrait is 1716x1748, so a fixed ratio crops the same slice the old
+            360x420 box did, but it now stays true when the column is narrower
+            than 360px instead of the image growing to fill whatever height the
+            row happens to take. */}
+        <div className="relative mx-auto aspect-[6/7] w-full max-w-[360px] overflow-hidden rounded-3xl bg-surface-2">
           <Image
-            src="/images/Formal-Picture - Ralph.jpg"
-            alt="Ethan, a software engineer"
+            src={site.avatar.src}
+            alt={site.avatar.alt}
             fill
             loading="lazy"
-            sizes="(min-width: 640px) 288px, 256px"
+            sizes="(min-width: 768px) 360px, 90vw"
             className="object-cover"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        {/* `items-center text-center` centres the actions inside their own column
+            on wide screens, and on a narrow one it falls back to the same
+            centred stack below the portrait. The portrait is a fixed 360px
+            rather than a fraction of the row, so the actions keep a consistent
+            measure instead of spreading to fill whatever is left. */}
+        <div className="flex flex-col items-center gap-8 text-center">
+          {/* `break-all` is a safety net, not the intended layout. Michroma is a
+              wide face and the address is 21 characters: at 20px it does not fit
+              a 320px screen and `break-all` would split it mid-address, so the
+              base size is 18px, which does fit on one line. The `md` step has
+              room for 24px. */}
           <a
             href={`mailto:${site.email}`}
-            className="font-mono text-sm text-accent-bright underline-offset-4 transition-colors hover:text-fg hover:underline"
+            className="type-display break-all text-lg text-fg underline-offset-[6px] transition-colors hover:text-accent-bright hover:underline md:text-2xl"
           >
             {site.email}
           </a>
-          {site.socials.map((social) => (
-            <a
-              key={social.href}
-              href={social.href}
-              className="font-mono text-xs uppercase tracking-[0.12em] text-accent-bright underline-offset-4 transition-colors hover:text-fg hover:underline"
-            >
-              {social.label}
-            </a>
-          ))}
+
+          {/* `max-w-md` because the portrait column is fixed, which leaves the
+              actions roughly 1080px to fill at 1440. Left uncapped the three
+              tiles spread to a third of the screen each and stop reading as a
+              set; `mx-auto` pulls the capped row back to the centre. */}
+          <ul className="mx-auto grid w-full max-w-md gap-3 sm:grid-cols-3">
+            {site.socials.map((social) => (
+              <li key={social.href}>
+                <a
+                  href={social.href}
+                  className="block border border-accent/40 px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-accent-bright transition-colors hover:border-accent-bright"
+                >
+                  {social.label}
+                </a>
+              </li>
+            ))}
+            {/* Also linked from the hero. Repeated deliberately: a resume is a
+                closing-section action, and the hero link is a small pill. */}
+            <li>
+              <a
+                href={site.resume.href}
+                download={site.resume.filename}
+                className="block border border-accent/40 px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.12em] text-accent-bright transition-colors hover:border-accent-bright"
+              >
+                Résumé
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
     </Section>

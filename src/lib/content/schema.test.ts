@@ -114,6 +114,42 @@ describe("content schema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("rejects a non-positive screenshot aspect", () => {
+    for (const aspect of [0, -1.6]) {
+      const result = projectSchema.safeParse({
+        ...validProject,
+        screenshot: { src: "/projects/example.png", alt: "Example", aspect },
+      });
+      expect(result.success, `aspect ${aspect} should be rejected`).toBe(false);
+    }
+  });
+});
+
+describe("project screenshot ratios", () => {
+  it("gives every project an aspect", () => {
+    const missing = projects.filter((p) => !p.screenshot.aspect);
+    expect(
+      missing.map((p) => p.slug),
+      "these will fall back to the 10/6 default and may crop",
+    ).toEqual([]);
+  });
+
+  it("keeps every aspect plausible for a screenshot", () => {
+    // A frame that matches its image exactly is the whole point of the field.
+    // Anything outside this band is a sign the number was typed by hand rather
+    // than measured, or that a portrait/infographic slipped in.
+    for (const project of projects) {
+      expect(
+        project.screenshot.aspect,
+        `${project.slug} aspect is out of range`,
+      ).toBeGreaterThan(1);
+      expect(
+        project.screenshot.aspect,
+        `${project.slug} aspect is out of range`,
+      ).toBeLessThan(3);
+    }
+  });
 });
 
 describe("skill marks", () => {

@@ -105,7 +105,7 @@ function throttle<A extends unknown[]>(
  */
 export function DotGrid({
   className = "",
-  dotSize = 32,
+  dotSize = 24,
   gap = 16,
   baseColor = "#5227FF",
   activeColor = "#5227FF",
@@ -202,6 +202,12 @@ export function DotGrid({
     let frame = 0;
     let looping = false;
 
+    // Scrolling away is not the only way to stop being able to see this. A
+    // backgrounded tab keeps its IntersectionObserver entry exactly as it was —
+    // the grid still counts as on-screen — so without this the loop keeps
+    // repainting a full-viewport canvas for a tab nobody is looking at.
+    let pageVisible = !document.hidden;
+
     const tick = () => {
       draw();
       if (onScreen) {
@@ -212,14 +218,22 @@ export function DotGrid({
     };
 
     const syncLoop = () => {
-      if (onScreen && !looping) {
+      const shouldRun = onScreen && pageVisible;
+      if (shouldRun && !looping) {
         looping = true;
         frame = requestAnimationFrame(tick);
-      } else if (!onScreen && looping) {
+      } else if (!shouldRun && looping) {
         cancelAnimationFrame(frame);
         looping = false;
       }
     };
+
+    const handleVisibility = () => {
+      pageVisible = !document.hidden;
+      syncLoop();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
 
     const settle = (dot: Dot) => {
       dot.near = false;
@@ -341,6 +355,7 @@ export function DotGrid({
       viewport.disconnect();
       observer.disconnect();
       cancelAnimationFrame(frame);
+      document.removeEventListener("visibilitychange", handleVisibility);
 
       if (throttledMove) {
         window.removeEventListener("pointermove", throttledMove);

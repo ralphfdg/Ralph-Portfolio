@@ -31,6 +31,13 @@ export const projectSchema = z
     screenshot: z.object({
       src: z.string().min(1),
       alt: z.string().min(1),
+      /**
+       * width / height of the source image, so the frame that holds it can
+       * match instead of cropping. Optional: a project that omits it falls back
+       * to the default ratio in `.shot-frame`, which is a letterboxed-crop risk
+       * only if its screenshot is not roughly that shape.
+       */
+      aspect: z.number().positive().optional(),
     }),
     links: z.array(projectLinkSchema),
     featured: z.boolean(),

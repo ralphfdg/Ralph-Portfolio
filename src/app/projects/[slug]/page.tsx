@@ -95,7 +95,12 @@ function ProjectDetail({ project }: { project: Project }) {
       </header>
 
       <div className="mx-auto w-full max-w-5xl px-6 py-14">
-        <div className="relative aspect-16/9 overflow-hidden border border-line bg-accent-deep">
+        <div
+          className="shot-frame relative overflow-hidden border border-line bg-accent-deep"
+          style={
+            { "--shot-aspect": project.screenshot.aspect } as React.CSSProperties
+          }
+        >
           <Image
             src={project.screenshot.src}
             alt={project.screenshot.alt}

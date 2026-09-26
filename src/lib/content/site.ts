@@ -8,7 +8,8 @@ export const site: SiteConfig = {
   email: "ralphethan18@gmail.com",
 
   avatar: {
-    src: "/avatar.jpg",
+    // This pointed at `/avatar.jpg`, which has never existed in `public/`.
+    src: "/images/Formal-Picture - Ralph.jpg",
     alt: "Portrait of Ethan",
   },
 

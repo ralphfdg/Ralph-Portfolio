@@ -20,6 +20,7 @@ export const projects: Project[] = [
     screenshot: {
       src: "/projects/securx.png",
       alt: "The SecuRx prescription dashboard, showing the queue of patient consultations awaiting a signed digital prescription.",
+      aspect: 1897 / 907,
     },
     links: [{ label: "Live Demo", href: "https://securx.on-forge.com/" }],
     featured: true,
@@ -53,6 +54,7 @@ export const projects: Project[] = [
     screenshot: {
       src: "/projects/ryb-vehicle-trading.png",
       alt: "The RYB vehicle listing grid, showing filtered search results with vehicle photographs, specifications, and prices.",
+      aspect: 1080 / 567,
     },
     links: [{ label: "Source", href: "https://github.com/ralphfdg/ryb-site" }],
     featured: true,
@@ -93,6 +95,7 @@ export const projects: Project[] = [
     screenshot: {
       src: "/projects/modern-homes.png",
       alt: "The Modern Homes three-tier AWS architecture, showing public, private application, and private database subnets with their standby targets.",
+      aspect: 1600 / 1000,
     },
     links: [],
     featured: true,

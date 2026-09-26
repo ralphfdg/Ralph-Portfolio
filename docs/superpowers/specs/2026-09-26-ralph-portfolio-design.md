@@ -3,6 +3,9 @@
 Date: 2026-09-26
 Status: Approved in conversation, pending written review
 Revised: 2026-09-26 — visual layer superseded by the dark geometric redesign below
+Revised: 2026-09-26 — `muted-bright` token added and the section ambience
+  relocated, by the Grainient pass. See
+  `2026-09-26-ralph-portfolio-grainient-design.md`.
 
 ## Redesign addendum (2026-09-26)
 
@@ -26,9 +29,16 @@ section wherever the two disagree.
 | Shape language | Rounded, paper cards | Square corners; rounded hero pills kept on purpose |
 
 **Tokens.** `bg #08080a`, `surface #101014`, `surface-2 #17171c`, `line #26262e`,
-`fg #f4f4f1`, `muted #8b8b95`, `accent #4d6fd1`, `accent-bright #9db4e3`,
-`accent-deep #1c2547`, `status-wip #e08a3c`. The `line-soft` token is currently
-unused and a candidate for removal.
+`fg #f4f4f1`, `muted #8b8b95`, `muted-bright #c2c4cd`, `accent #4d6fd1`,
+`accent-bright #9db4e3`, `accent-deep #1c2547`, `status-wip #e08a3c`. The
+`line-soft` token is currently unused and a candidate for removal.
+
+`muted-bright` was added later, in the Grainient pass. It exists for one job:
+**text that sits on a moving field** — the hero hook, and the contact eyebrow
+and lede. `muted` is 4.5:1 against the flat page background but only ~3.3:1 once
+the shader, dot lattice or gradient blobs are behind it, which fails AA. It is
+not a general-purpose lighter grey; do not apply it to body copy. See
+`2026-09-26-ralph-portfolio-grainient-design.md`.
 
 **Rounded pills are intentional.** The hero CTAs are the only rounded elements in
 the site, kept as the one piece of soft contrast against the geometry. Do not
