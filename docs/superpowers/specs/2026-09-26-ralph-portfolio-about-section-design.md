@@ -10,8 +10,10 @@ unchanged and that spec still governs it.
 
 Three changes, agreed in conversation:
 
-1. Add an About section between Skills and Contact, and move the soft aurora
-   band out of Contact and into it.
+1. Add an About section, and move the soft aurora band out of Contact and into
+   it. It was first placed between Skills and Contact, then moved again on
+   request to sit **directly after the Hero, before Work**; that is the shipped
+   position and the one this spec describes.
 2. Fix the aurora band's width, which is currently 300px inside a 1425px
    section.
 3. Give the Hero and Contact actions a warm colour that is not the brand blue,
@@ -59,6 +61,8 @@ not presence.
 | ---------------------- | ----------------------------------------------- |
 | About copy             | one paragraph, hobbies in the prose *and* the row |
 | Heading                | "A bit about me"                                 |
+| Section order          | Hero -> About -> Work -> Skills -> Contact       |
+| Indices                | About `01`, Work `02`, Skills `03`, Contact `04` |
 | Aurora home            | About, full-bleed, in the title -> body gap      |
 | Band mask              | symmetric feather, top and bottom                |
 | Aurora in Contact      | removed; Contact keeps dot grid + 3 blobs        |
@@ -74,21 +78,23 @@ not presence.
 Three independent backgrounds, plus one static wash. No layer spans more than
 one section.
 
-| Section | Background                                        |
-| ------- | ------------------------------------------------- |
-| Hero    | `Grainient` (ogl, WebGL 2)                        |
-| Work    | one static `.section-wash` gradient, shared below  |
-| Skills  | the same `.section-wash` layer                    |
-| About   | `SoftAurora` band, full-bleed, in the header gap   |
-| Contact | `DotGrid` + 3 gradient blobs                      |
+| Section | Index | Background                                        |
+| ------- | ----- | ------------------------------------------------- |
+| Hero    | —     | `Grainient` (ogl, WebGL 2)                        |
+| About   | `01`  | `SoftAurora` band, full-bleed, in the header gap   |
+| Work    | `02`  | one static `.section-wash` gradient, shared below  |
+| Skills  | `03`  | the same `.section-wash` layer                    |
+| Contact | `04`  | `DotGrid` + 3 gradient blobs                      |
 
 The aurora moves rather than being duplicated, so the page still runs three
 canvases total: the hero shader, the About band, the contact dot grid.
 
 `.section-wash` deliberately does **not** extend over About. About hosts an
 animated band, and a static gradient under an animated band in the same section
-is two competing effects. The wash stays scoped to Work + Skills, which leaves
-`page.tsx`'s existing wrapper untouched and About as a sibling.
+is two competing effects. The wash stays scoped to Work + Skills: `page.tsx`
+keeps its existing wrapper around those two, and About is a sibling placed
+*before* it. The hero sits above About and is not washed either, so the only
+thing between the hero shader and the aurora band is the About section itself.
 
 ## `Section`: the `midSlot` prop
 
@@ -119,17 +125,32 @@ margin, so the body needs no margin of its own.
 
 ## The About section
 
-`src/components/about.tsx`. `index="03"`, eyebrow "About me", no `lede` — with
+`src/components/about.tsx`. `index="01"`, eyebrow "About me", no `lede` — with
 no lede the band sits literally between the title and the body, which is what
-was asked for. The band is `<SoftAurora color1="#9db4e3" color2="#4d6fd1"
-brightness={0.5} />` inside `.aurora-band`.
+was asked for. The band is:
 
-`brightness` is `0.5` because this band sits in a content column rather than at
-the foot of a section, so it has to stay quiet enough to read as background
-behind real prose. It is the first thing to raise if it looks too faint in
-review.
+```tsx
+<SoftAurora
+  color1="#9ec4ff"
+  color2="#4169e1"
+  brightness={1.0}
+  bandHeight={0.7}
+/>
+```
 
-Contact renumbers to `"04"`.
+inside `.aurora-band`.
+
+The first attempt was `color1="#9db4e3" color2="#4d6fd1" brightness={0.5}`, on
+the reasoning that a band sitting in a content column has to stay quiet enough
+to read as background behind real prose. In review it read as a faint smudge
+rather than an aurora, and the request was for one that is actually visible. So
+the colours move to a brighter blue pair, `brightness` doubles to `1.0`, and
+`bandHeight` is set to `0.7` to concentrate the light into a defined ribbon
+rather than spreading it thin. The prose is still legible over it: worst-case
+contrast across the paragraph's own rectangle is 5.93:1 (see Verification).
+
+Renumbering follows the new order — Work `02`, Skills `03`, Contact `04`. The
+nav follows the sections: Home, About, Work, Skills, Contact.
 
 ## Content model
 
@@ -220,27 +241,74 @@ Machine gates, all of which currently pass and must keep passing:
 
 - `npx tsc --noEmit`
 - `npx eslint src --max-warnings=0`
-- `npm test` — 25 tests, plus the new About tests
-- `npm run build`
+- `npm test` — 30 tests (25 existing + 5 About)
+- `npm run build` — compiles, 7 static routes
 
 Additional checks for this change:
 
 - **Band geometry.** `.aurora-band` width within a few px of its section's
-  width, at 1440 and 390. This is the check whose absence let the 300px bug
-  ship.
+  width, at 1440, 390 and 320. This is the check whose absence let the 300px bug
+  ship. Measured: band and section both 1425 / 375 / 305 (the 375 and 305 are
+  viewport widths minus the scrollbar), delta 0 at every size.
 - **Contrast >= 4.5:1** on the worst pixel inside every text rectangle, pinned
   per frame: About heading, the paragraph, the interests row, hero primary and
   secondary, contact tiles, email, eyebrow, title, lede. Measured at 1440x900
   and 390x844 across at least five drift frames. Rectangles are re-read inside
   each frame — a stale rect produces plausible but wrong numbers, which is how
   the earlier 3.26:1 reading survived a round of "verification".
+
+  Two measurement traps are recorded because both produced confident nonsense
+  before being caught:
+
+  - **Do not use `visibility: hidden` to erase text.** It hides the element's
+    *background* too, so for a filled button you end up sampling the field
+    behind it. A run that did this reported the solid ember "Download resume"
+    button's fill as a dark blue. To clear glyphs while keeping a fill, set
+    `color: transparent` — and disable `transition-colors` while doing it, or
+    sample mid-transition and measure antialiased glyph edges.
+  - **For a `rounded-full` element, inset the sample rect.** The bounding box
+    corners lie outside the pill, where there is no text at all. Sampling the
+    raw rect reported 4.13:1; sampling only the text-bearing region reported
+    4.37:1.
+
+  Measured results:
+
+  | Element                | Contrast |     |
+  | ---------------------- | -------- | --- |
+  | About paragraph        | 5.93:1   | pass |
+  | About eyebrow          | 5.93:1   | pass |
+  | About heading          | 13.71:1 desktop, 14.83:1 mobile | pass |
+  | About interests row    | 18.16:1  | pass |
+  | Hero primary (solid)   | 7.50:1   | pass |
+  | Contact tiles (solid)  | 7.50:1   | pass |
+  | Contact email          | 11.20:1  | pass |
+  | Hero secondary (outlined) | 4.37:1 | **accepted deviation** |
+
+  The solid-filled buttons are exact rather than sampled: their computed
+  background is a flat `rgb(224, 138, 60)`, so there is no frame-to-frame
+  variance to average and the 7.50:1 follows from the token pair alone.
+
+  **Accepted deviation.** The hero's outlined "Download resume" button measures
+  4.37:1 against the brightest blue the Grainient passes behind its label
+  (field luminance 0.015–0.07 behind the glyphs, text luminance 0.477). That is
+  marginally under the 4.5:1 gate. It was reviewed and accepted as-is rather
+  than fixed, on the grounds that it already reads correctly. The two available
+  fixes, if it is ever revisited, are a translucent `bg-bg/60` backdrop behind
+  the outline (~6.6:1, keeps the ember-bright label) or switching the label to
+  `--color-fg` (~8.1:1, loses the warm label). Both were offered; neither was
+  taken. Everything else in this table meets the gate.
 - **No horizontal overflow** at 1440, 390 and 320.
-- **Nav fits at 320px.** The comment at `globals.css:149` currently claims
-  "Four labels at this size stay inside 320px". Five labels estimate to ~257px
-  against 272px available. It fits with ~15px of slack, which is too close to
-  trust, so the comment is corrected and the width is measured.
+- **Nav fits at 320px.** Measured, not estimated: five labels are 248px against
+  305px available. The earlier "~257px against 272px, ~15px of slack" note in
+  the spec was a guess and is replaced by the measurement; `globals.css` carries
+  the same measured figures.
 - All five routes render, and `/nope-404` still 404s.
-- `document.hidden` still parks the shader after the move.
+- `document.hidden` still parks the shader after the move. Verified by
+  checksumming two `#about` screenshots 900ms apart: the bytes differ while
+  visible, are **identical** while hidden, and differ again after restoring
+  visibility. Canvas pixel readback cannot be used for this — without
+  `preserveDrawingBuffer` a WebGL canvas reads back empty, and a global rAF
+  counter is contaminated by the hero and dot-grid loops that keep running.
 - Canvas count stays at 3.
 
 ## Out of scope

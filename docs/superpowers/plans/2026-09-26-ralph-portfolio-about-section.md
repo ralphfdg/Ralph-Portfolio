@@ -17,12 +17,37 @@
 - Approved About copy is **360 characters / 68 words**. The schema cap is `.max(400)`, set from that measurement. Do not "tidy" the cap to a rounder number.
 - `aboutSchema.paragraphs` is `.min(1)`, not `.min(2)`. The approved copy is a single paragraph.
 - The band spacer is exactly `h-[120px]` and is the paragraph's top margin. The body gets no margin of its own.
-- `brightness={0.5}` on the About `SoftAurora`. It is the first thing to raise if the band looks faint in review.
-- Sections renumber: Projects `01`, Skills `02`, About `03`, Contact `04`.
-- The `.section-wash` wrapper in `page.tsx` stays scoped to Projects + Skills. About is a sibling, not a child.
+- `brightness={1.0}` on the About `SoftAurora`, with `color1="#9ec4ff" color2="#4169e1" bandHeight={0.7}`. **Revised during execution** — see Deviations below.
+- Sections renumber: About `01`, Projects `02`, Skills `03`, Contact `04`. **Revised during execution** — see Deviations below.
+- The `.section-wash` wrapper in `page.tsx` stays scoped to Projects + Skills. About is a sibling, not a child — placed *before* the wrapper.
 - Comment style in this codebase is dense and explains *why*, including what breaks and what was measured. Match it; do not add comments that restate the code.
 - TypeScript is `noUnusedLocals`-clean. Every import added is used or it is a build failure.
 - No new dependencies. No DOM-testing library — the suite is pure Node, so behavioural checks run through vitest only for pure functions, and decorative geometry is verified in the browser.
+
+---
+
+## Deviations from this plan
+
+This plan was executed, then adjusted twice on request. The task steps below are
+left as written so they record what was actually run; the shipped result differs
+in three places.
+
+1. **About moved above Work.** The plan places About between Skills and
+   Contact. It shipped directly after the Hero, before Work, so the order is
+   Hero -> About -> Work -> Skills -> Contact and the indices are About `01`,
+   Work `02`, Skills `03`, Contact `04`. The nav follows the section order.
+   `.section-wash` still wraps only Work + Skills, so About became a sibling
+   *before* that wrapper instead of after it.
+2. **Aurora brightened.** The plan's `color1="#9db4e3" color2="#4d6fd1"
+   brightness={0.5}` read as a faint smudge in review. Shipped as
+   `color1="#9ec4ff" color2="#4169e1" brightness={1.0} bandHeight={0.7}`. The
+   prose still clears the contrast gate at 5.93:1.
+3. **One contrast gate waived.** The hero's outlined "Download resume" button
+   measures 4.37:1, marginally under the 4.5:1 target. Reviewed and accepted
+   rather than fixed; the two candidate fixes are recorded in the spec. Every
+   other measured element passes.
+
+The spec is the source of truth for all three.
 
 ---
 

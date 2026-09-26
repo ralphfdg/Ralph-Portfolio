@@ -6,6 +6,13 @@ Supersedes: the hero atmosphere section of
 `2026-09-26-ralph-portfolio-atmosphere-design.md` §5 and §6, and the
 atmosphere addendum in `2026-09-26-ralph-portfolio-design.md` lines 49–63.
 
+Partially superseded: the **Contact** background row of the structure table
+(line 33), the Contact atmosphere work, and the ember action colours. The
+`SoftAurora` band that this spec places in Contact now lives in a new About
+section, and the action colours moved from accent blue to `ember`. See
+`2026-09-26-ralph-portfolio-about-section-design.md`. The Grainient hero itself
+is unchanged and this spec still governs it in full.
+
 ## Goal
 
 Three changes, agreed in conversation:
@@ -30,7 +37,11 @@ Two independent backgrounds. No layer spans more than one section.
 | Hero     | `Grainient` (ogl, WebGL 2)                                       |
 | Work     | one static `.section-wash` gradient, shared with Skills          |
 | Skills   | the same `.section-wash` layer                                   |
-| Contact  | `DotGrid` + `SoftAurora` band + 3 gradient blobs                  |
+| Contact  | `DotGrid` + 3 gradient blobs                                     |
+
+> Superseded: the `SoftAurora` band has moved out of Contact into a new About
+> section, and About is now ordered directly after the Hero. See
+> `2026-09-26-ralph-portfolio-about-section-design.md`.
 
 Each decoration now exists exactly once and animates only while its own
 section is on screen.
