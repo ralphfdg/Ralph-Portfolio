@@ -144,3 +144,6 @@ next-env.d.ts
 
 # testing
 /coverage
+
+# browser-automation scratch output
+/.playwright-mcp/
